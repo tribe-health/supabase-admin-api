@@ -4,8 +4,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var configFile = ""
-
 var rootCmd = cobra.Command{
 	Use: "supabase-admin-api",
 	Run: func(cmd *cobra.Command, args []string) {

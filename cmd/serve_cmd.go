@@ -1,10 +1,8 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
-	"github.com/gobuffalo/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/supabase/supabase-admin-api/api"
@@ -18,12 +16,15 @@ var serveCmd = cobra.Command{
 	},
 }
 
-func serve(config *Config) {
-	ctx, err := api.WithInstanceConfig(context.Background(), config, uuid.Nil)
-	if err != nil {
-		logrus.Fatalf("Error loading instance config: %+v", err)
-	}
-	api := api.NewAPIWithVersion(ctx, config, Version)
+func serve() {
+	config := api.Config{}
+	config.Host = "localhost"
+	config.Port = 8085
+	config.Endpoint = "ENDPOINT"
+	config.RequestIDHeader = "REQUEST_ID_HEADER"
+	config.ExternalURL = "API_EXTERNAL_URL"
+
+	api := api.NewAPIWithVersion(&config, Version)
 
 	l := fmt.Sprintf("%v:%v", config.Host, config.Port)
 	logrus.Infof("Supabase Admin API started on: %s", l)
