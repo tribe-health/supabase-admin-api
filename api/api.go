@@ -93,6 +93,36 @@ func NewAPIWithVersion(config *Config, version string) *API {
 		r.Route("/test", func(r *router) {
 			r.Get("/", api.TestGet)
 		})
+
+		r.Route("/service", func(r *router) {
+			r.Get("/restart", api.RestartServices)
+			r.Get("/reboot", api.RebootMachine)
+		})
+
+		r.Route("/postgrest", func(r *router) {
+			r.Get("/env", api.GetPostgrestEnv)
+			r.Post("/env", api.SetPostgrestEnv)
+		})
+
+		r.Route("/kong", func(r *router) {
+			r.Get("/yaml", api.GetKongYaml)
+			r.Post("/yaml", api.SetKongYaml)
+		})
+
+		r.Route("/pglisten", func(r *router) {
+			r.Get("/env", api.GetPGListenEnv)
+			r.Post("/env", api.SetPGListenEnv)
+		})
+
+		r.Route("/realtime", func(r *router) {
+			r.Get("/env", api.GetRealtimeEnv)
+			r.Post("/env", api.SetRealtimeEnv)
+		})
+
+		r.Route("/gotrue", func(r *router) {
+			r.Get("/env", api.GetGotrueEnv)
+			r.Post("/env", api.SetGotrueEnv)
+		})
 	})
 
 	corsHandler := cors.New(cors.Options{
