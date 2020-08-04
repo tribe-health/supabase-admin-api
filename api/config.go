@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-const postgrestConfPath string = "./README.md"
+const postgrestConfPath string = "/etc/postgrest.conf"
 const postgrestConfPathOld string = "/etc/old.postgrest.conf"
 
 const pgListenConfPath string = "/etc/pg_listen.conf"
@@ -24,9 +24,6 @@ const realtimeEnvPathOld string = "/etc/old.supabase.env"
 const kongYmlPath string = "/etc/kong/kong.yml"
 const kongYmlPathOld string = "/etc/kong/old.kong.yml"
 
-var configFilePath string
-var configFilePathOld string
-
 // FileContents holds the content of a config file
 type FileContents struct {
 	RawContents     string `json:"raw_contents"`
@@ -35,12 +32,13 @@ type FileContents struct {
 
 // GetFileContents is the method for returning the contents of a given file
 func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
+	var configFilePath string
 	application := chi.URLParam(r, "application")
 
 	switch application {
 	case "test":
 		configFilePath = "./README.md"
-	case "goauth":
+	case "gotrue":
 		configFilePath = gotrueEnvPath
 	case "postgrest":
 		configFilePath = postgrestConfPath
@@ -54,7 +52,7 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 
 	contents, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
-		return unprocessableEntityError(configFilePath)
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 	fileContents := &FileContents{}
 	fileContents.RawContents = string(contents)
@@ -63,13 +61,16 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 
 // SetFileContents sets the data in a given file
 func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
+	var configFilePath string
+	var configFilePathOld string
+
 	application := chi.URLParam(r, "application")
 
 	switch application {
 	case "test":
 		configFilePath = "./README.md"
 		configFilePathOld = "./old.README.md"
-	case "goauth":
+	case "gotrue":
 		configFilePath = gotrueEnvPath
 		configFilePathOld = gotrueEnvPathOld
 	case "postgrest":
@@ -90,7 +91,7 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 
 	jsonDecoder := json.NewDecoder(r.Body)
 	if err := jsonDecoder.Decode(params); err != nil {
-		return badRequestError("Could not read config file data: %v", err)
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
 	err := os.Rename(configFilePath, configFilePathOld)
