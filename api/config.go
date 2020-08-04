@@ -29,7 +29,8 @@ var configFilePathOld string
 
 // FileContents holds the content of a config file
 type FileContents struct {
-	RawContents string `json:"raw_contents"`
+	RawContents     string `json:"raw_contents"`
+	RestartServices bool   `json:"restart_services"`
 }
 
 // GetFileContents is the method for returning the contents of a given file
@@ -104,10 +105,15 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 	defer f.Close()
 
 	bytesWritten, err := f.WriteString(params.RawContents)
+	_ = bytesWritten
 	if err != nil {
 		return err
 	}
 	f.Sync()
+
+	if params.RestartServices {
+		return a.RestartServices(w, r)
+	}
 
 	return sendJSON(w, http.StatusOK, map[string]int{"bytes_written": bytesWritten})
 }
