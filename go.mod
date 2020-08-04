@@ -29,6 +29,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rogpeppe/go-internal v1.6.1 // indirect
 	github.com/rs/cors v1.7.0
+	github.com/rs/zerolog v1.15.0
 	github.com/sebest/xff v0.0.0-20160910043805-6c115e0ffa35
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
