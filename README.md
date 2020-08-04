@@ -9,23 +9,23 @@ To run on KPS and administer configs for services:
 
 ## API Interface
 
-GET `/config/postgrest` - returns current config `{ raw_contents: <string-of-file-contents>`
+GET `/config/postgrest` - returns current config `{ raw_contents: <string-of-file-contents> }`
 
 POST `/config/postgrest` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
 
-GET `/config/kong` - returns current config `{ raw_contents: <string-of-file-contents>`
+GET `/config/kong` - returns current config `{ raw_contents: <string-of-file-contents> }`
 
 POST `/config/kong` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
 
-GET `/config/pglisten` - returns current config `{ raw_contents: <string-of-file-contents>`
+GET `/config/pglisten` - returns current config `{ raw_contents: <string-of-file-contents> }`
 
 POST `/config/pglisten` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
 
-GET `/config/realtime` - returns current config `{ raw_contents: <string-of-file-contents>`
+GET `/config/realtime` - returns current config `{ raw_contents: <string-of-file-contents> }`
 
 POST `/config/realtime` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
 
-GET `/config/goauth` - returns current config as `{ raw_contents: <string-of-file-contents>`
+GET `/config/goauth` - returns current config as `{ raw_contents: <string-of-file-contents> }`
 
 POST `/config/goauth` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
 
