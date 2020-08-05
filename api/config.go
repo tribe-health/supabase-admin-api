@@ -104,11 +104,6 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-	err = os.Chmod(configFilePath, 664)
-	if err != nil {
-		return sendJSON(w, http.StatusInternalServerError, err.Error())
-	}
-
 	defer f.Close()
 
 	bytesWritten, err := f.WriteString(params.RawContents)
@@ -117,6 +112,11 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 	f.Sync()
+
+	err = os.Chmod(configFilePath, 0664)
+	if err != nil {
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
+	}
 
 	if params.RestartServices {
 		return a.RestartServices(w, r)
