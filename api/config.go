@@ -96,19 +96,25 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 
 	err := os.Rename(configFilePath, configFilePathOld)
 	if err != nil {
-		return err
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
 	f, err := os.Create(configFilePath)
 	if err != nil {
-		return err
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
+
+	err = os.Chmod(configFilePath, 664)
+	if err != nil {
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
+	}
+
 	defer f.Close()
 
 	bytesWritten, err := f.WriteString(params.RawContents)
 	_ = bytesWritten
 	if err != nil {
-		return err
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 	f.Sync()
 
