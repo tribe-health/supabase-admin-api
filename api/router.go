@@ -2,7 +2,9 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 )
@@ -71,6 +73,7 @@ type middlewareHandler func(w http.ResponseWriter, r *http.Request) (context.Con
 
 func (m middlewareHandler) handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Printf("[%s] %s %s\n", time.Now().Format("2006-01-02 15:04:05"), r.Method, r.RequestURI)
 		m.serve(next, w, r)
 	})
 }

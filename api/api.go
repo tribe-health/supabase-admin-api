@@ -104,6 +104,11 @@ func NewAPIWithVersion(config *Config, version string) *API {
 			r.Get("/", api.GetFileContents)
 			r.Post("/", api.SetFileContents)
 		})
+
+		// applications are kong, pglisten, postgrest, goauth, realtime
+		r.Route("/logs/{application}/{type}/{n:[0-9]*}", func(r *router) {
+			r.Get("/", api.GetLogContents)
+		})
 	})
 
 	corsHandler := cors.New(cors.Options{
