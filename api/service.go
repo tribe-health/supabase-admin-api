@@ -9,10 +9,11 @@ import (
 
 // RestartServices is the endpoint for fetching current goauth email config
 func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
+	sudo := "sudo"
 	app := "systemctl"
 	arg0 := "daemon-reload"
 
-	cmd := exec.Command(app, arg0)
+	cmd := exec.Command(sudo, app, arg0)
 	stdout, err := cmd.Output()
 
 	if err != nil {
@@ -22,11 +23,12 @@ func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
 
 	fmt.Fprintf(os.Stdout, string(stdout))
 
+	sudo = "sudo"
 	app = "systemctl"
 	arg0 = "restart"
 	arg1 := "services.slice"
 
-	cmd = exec.Command(app, arg0, arg1)
+	cmd = exec.Command(sudo, app, arg0, arg1)
 	stdout, err = cmd.Output()
 
 	if err != nil {
