@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 )
 
@@ -74,7 +76,34 @@ type middlewareHandler func(w http.ResponseWriter, r *http.Request) (context.Con
 func (m middlewareHandler) handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("[%s] %s %s\n", time.Now().Format("2006-01-02 15:04:05"), r.Method, r.RequestURI)
-		m.serve(next, w, r)
+
+		// get jwt token from api header
+		tokenString := r.Header.Get("apikey")
+
+		jwtSecret := os.Getenv("JWT_SECRET")
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			// Don't forget to validate the alg is what you expect:
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			}
+
+			// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+			return []byte(jwtSecret), nil
+		})
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			if claims["role"] == "supabase_admin" {
+				// successful authentication
+				m.serve(next, w, r)
+			} else {
+				fmt.Printf("[%s] %s %s %d %s\n", time.Now().Format("2006-01-02 15:04:05"), r.Method, r.RequestURI, http.StatusForbidden, "this token does not have a valid claim over the correct role")
+				sendJSON(w, http.StatusForbidden, "this token does not have a valid claim over the correct role")
+			}
+		} else {
+			fmt.Printf("[%s] %s %s %d %s\n", time.Now().Format("2006-01-02 15:04:05"), r.Method, r.RequestURI, http.StatusForbidden, err)
+			sendJSON(w, http.StatusForbidden, err)
+		}
 	})
 }
 
