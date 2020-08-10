@@ -7,7 +7,17 @@ To run on KPS and administer configs for services:
 - Postgrest
 - Pg-listen
 
+## ENV
+
+requires a `.env` with:
+```bash
+JWT_SECRET=<project-jwt-secret>
+```
+
 ## API Interface
+### Auth
+You must set the `apikey` header to be a valid JWT token, signed by JWT_SECRET and with a claim of: `role: supabase_admin`
+
 ### Configs
 GET `/config/postgrest` - returns current config `{ raw_contents: <string-of-file-contents> }`
 
