@@ -21,6 +21,7 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: '^1.14.4' # The Go version to download (if necessary) and use.
+      - run: make deps
       - run: make all
       - run: tar -czvf supabase-admin-api-${{ steps.create_release.outputs.name }}.tar.gz supabase-admin-api
       - name: Upload Release Asset
