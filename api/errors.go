@@ -143,6 +143,7 @@ func recoverer(w http.ResponseWriter, r *http.Request) (context.Context, error) 
 	return nil, nil
 }
 
+// ErrorCause provides error information
 type ErrorCause interface {
 	Cause() error
 }

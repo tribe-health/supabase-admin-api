@@ -121,6 +121,7 @@ func NewAPIWithVersion(config *Config, version string) *API {
 	return api
 }
 
+// HealthCheck returns basic information for status purposes
 func (a *API) HealthCheck(w http.ResponseWriter, r *http.Request) error {
 	return sendJSON(w, http.StatusOK, map[string]string{
 		"version":     a.version,
