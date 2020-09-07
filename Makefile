@@ -8,7 +8,7 @@ help: ## Show this help.
 all: lint vet test build ## Run the tests and build the binary.
 
 build: ## Build the binary.
-	go build -ldflags "-X github.com/supabase/supabase_admin_api/cmd.Version=`git rev-parse HEAD`"
+	go build -ldflags "-X github.com/supabase/supabase-admin-api/cmd.Version=`git rev-parse HEAD`"
 
 deps: ## Install dependencies.
 	@go get -u golang.org/x/lint/golint
