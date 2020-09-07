@@ -28,13 +28,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - id: releases
-        uses: pozetroninc/github-action-get-latest-release@master
-        with:
-          owner: supabase
-          repo: supabase-admin-api
-          excludes: prerelease, draft
-
+  deploy:
+    needs: release
+    if: needs.release.outputs.status == 'success'
+    steps:
       - uses: actions/setup-go@v2
         with:
           go-version: '^1.14.4' # The Go version to download (if necessary) and use.
@@ -43,10 +40,17 @@ jobs:
 
       - run: make all
 
+      - id: releases
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          owner: supabase
+          repo: supabase-admin-api
+          excludes: prerelease, draft
+
       - run: tar -czvf supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz supabase-admin-api
 
       - uses: actions/upload-artifact@v1
         with:
-          name: ./supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz
-          path: supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz
+          name: supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz
+          path: ./supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz
 
