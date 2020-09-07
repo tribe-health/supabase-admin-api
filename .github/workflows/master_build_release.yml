@@ -49,8 +49,9 @@ jobs:
   deploy:
     needs: release
     runs-on: ubuntu-18.04
-    if: needs.release.outputs.status == true
+    # if: needs.release.outputs.status == true
     steps:
+      - run: echo ${{ steps.pre-release.outputs.release != steps.post-release.outputs.release }}
       - uses: actions/checkout@v2
       
       - uses: actions/setup-go@v2
