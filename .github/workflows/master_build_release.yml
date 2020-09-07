@@ -12,11 +12,18 @@ jobs:
         node: ['12']
 
     outputs:
-      status: ${{ steps.github-release.conclusion }}
+      status: ${{ steps.pre-release.outputs.release != steps.post-release.outputs.release }}
 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - id: pre-release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          owner: supabase
+          repo: supabase-admin-api
+          excludes: prerelease, draft
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -32,10 +39,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - id: post-release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          owner: supabase
+          repo: supabase-admin-api
+          excludes: prerelease, draft
+
   deploy:
     needs: release
     runs-on: ubuntu-18.04
-    if: needs.release.outputs.status == 'success'
+    if: needs.release.outputs.status
     steps:
       - uses: actions/checkout@v2
       
