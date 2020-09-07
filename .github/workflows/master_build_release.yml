@@ -1,0 +1,36 @@
+name: Build and Deploy on Push to Master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      # Drafts your next Release notes as Pull Requests are merged into "master"
+      - uses: release-drafter/release-drafter@v5
+        id: create_release
+        with:
+          publish: true
+          # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
+          # config-name: my-config.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.14.4' # The Go version to download (if necessary) and use.
+      - run: make all
+      - run: tar -czvf supabase-admin-api-${{ steps.create_release.outputs.name }}.tar.gz supabase-admin-api
+      - name: Upload Release Asset
+        id: upload_release_asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./supabase-admin-api-${{ steps.create_release.outputs.name }}.tar.gz
+          asset_name: supabase-admin-api-${{ steps.create_release.outputs.name }}.tar.gz
+          asset_content_type: application/gzip
