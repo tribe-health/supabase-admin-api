@@ -11,7 +11,7 @@ jobs:
       matrix:
         node: ['12']
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
@@ -30,6 +30,7 @@ jobs:
 
   deploy:
     needs: release
+    runs-on: ubuntu-18.04
     if: needs.release.outputs.status == 'success'
     steps:
       - uses: actions/setup-go@v2
