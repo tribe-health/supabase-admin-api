@@ -46,12 +46,15 @@ jobs:
           repo: supabase-admin-api
           excludes: prerelease, draft
 
+      
+
   deploy:
     needs: release
     runs-on: ubuntu-18.04
-    # if: needs.release.outputs.status == true
+    if: success() && needs.release.outputs.status == true
     steps:
-      - run: echo ${{ steps.pre-release.outputs.release != steps.post-release.outputs.release }}
+      - run: echo ${{ needs.release.outputs.status }}
+      - run: echo ${{ needs.release.outputs.status == true }}
       - uses: actions/checkout@v2
       
       - uses: actions/setup-go@v2
