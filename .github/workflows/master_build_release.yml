@@ -11,6 +11,9 @@ jobs:
       matrix:
         node: ['12']
 
+    outputs:
+      status: ${{ steps.github-release.conclusion }}
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,6 +24,7 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Release on GitHub
+        id: github-release
         run: npx semantic-release -p        \
           @semantic-release/commit-analyzer \
           @semantic-release/github         \
