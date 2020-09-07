@@ -15,9 +15,6 @@ deps: ## Install dependencies.
 	@go get -u golang.org/x/lint/golint
 	@go mod download
 
-image: ## Build the Docker image.
-	docker build .
-
 lint: ## Lint the code.
 	golint $(CHECK_FILES)
 

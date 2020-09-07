@@ -9,7 +9,7 @@ To run on KPS and administer configs for services:
 
 ## ENV
 
-requires a `.env` with:
+requires a `.env` in the project root with:
 ```bash
 JWT_SECRET=<project-jwt-secret>
 ```
