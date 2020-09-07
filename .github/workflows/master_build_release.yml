@@ -78,6 +78,7 @@ jobs:
       - uses: AButler/upload-release-assets@v2.0
         with:
           files: 'supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz'
+          release-tag: ${{ steps.releases.outputs.release }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Get release
