@@ -14,8 +14,7 @@ jobs:
         id: create_release
         with:
           publish: true
-          # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
-          # config-name: my-config.yml
+          config-name: release_drafter.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v2
