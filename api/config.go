@@ -24,6 +24,9 @@ const realtimeEnvPathOld string = "/etc/old.supabase.env"
 const kongYmlPath string = "/etc/kong/kong.yml"
 const kongYmlPathOld string = "/etc/kong/old.kong.yml"
 
+const adminapiEnvPath string = "/etc/adminapi.env"
+const adminapiEnvPathOld string = "/etc/old.adminapi.env"
+
 // FileContents holds the content of a config file
 type FileContents struct {
 	RawContents     string `json:"raw_contents"`
@@ -48,6 +51,8 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 		configFilePath = kongYmlPath
 	case "realtime":
 		configFilePath = realtimeEnvPath
+	case "adminapi":
+		configFilePath = adminapiEnvPath
 	}
 
 	contents, err := ioutil.ReadFile(configFilePath)
@@ -85,6 +90,9 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 	case "realtime":
 		configFilePath = realtimeEnvPath
 		configFilePathOld = realtimeEnvPathOld
+	case "adminapi":
+		configFilePath = adminapiEnvPath
+		configFilePathOld = adminapiEnvPathOld
 	}
 
 	params := &FileContents{}

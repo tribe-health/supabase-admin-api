@@ -95,11 +95,15 @@ func NewAPIWithVersion(config *Config, version string) *API {
 		})
 
 		r.Route("/service", func(r *router) {
-			r.Get("/restart", api.RestartServices)
+			// applications are kong, pglisten, postgrest, goauth, realtime, adminapi, all
+			r.Route("/restart", func(r *router) {
+				r.Get("/", api.RestartServices)
+				r.Get("/{application}", api.RestartServices)
+			})
 			r.Get("/reboot", api.RebootMachine)
 		})
 
-		// applications are kong, pglisten, postgrest, goauth, realtime
+		// applications are kong, pglisten, postgrest, goauth, realtime, adminapi
 		r.Route("/config/{application}", func(r *router) {
 			r.Get("/", api.GetFileContents)
 			r.Post("/", api.SetFileContents)
