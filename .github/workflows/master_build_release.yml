@@ -3,55 +3,55 @@ name: Build and Release on Push to Master
 on:
   push:
     branches:
-      - master
+      - da/build-arm
 
 jobs:
-  release:
-    strategy:
-      matrix:
-        node: ['12']
+  # release:
+  #   strategy:
+  #     matrix:
+  #       node: ['12']
 
-    outputs:
-      status: ${{ steps.pre-release.outputs.release != steps.post-release.outputs.release }}
+  #   outputs:
+  #     status: ${{ steps.pre-release.outputs.release != steps.post-release.outputs.release }}
 
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - id: pre-release
-        uses: pozetroninc/github-action-get-latest-release@master
-        with:
-          owner: supabase
-          repo: supabase-admin-api
-          excludes: prerelease, draft
+  #     - id: pre-release
+  #       uses: pozetroninc/github-action-get-latest-release@master
+  #       with:
+  #         owner: supabase
+  #         repo: supabase-admin-api
+  #         excludes: prerelease, draft
 
-      - name: Set up Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
+  #     - name: Set up Node
+  #       uses: actions/setup-node@v1
+  #       with:
+  #         node-version: ${{ matrix.node }}
 
-      - name: Release on GitHub
-        id: github-release
-        run: npx semantic-release -p        \
-          @semantic-release/commit-analyzer \
-          @semantic-release/github         \
-          @semantic-release/release-notes-generator
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Release on GitHub
+  #       id: github-release
+  #       run: npx semantic-release -p        \
+  #         @semantic-release/commit-analyzer \
+  #         @semantic-release/github         \
+  #         @semantic-release/release-notes-generator
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - id: post-release
-        uses: pozetroninc/github-action-get-latest-release@master
-        with:
-          owner: supabase
-          repo: supabase-admin-api
-          excludes: prerelease, draft
+  #     - id: post-release
+  #       uses: pozetroninc/github-action-get-latest-release@master
+  #       with:
+  #         owner: supabase
+  #         repo: supabase-admin-api
+  #         excludes: prerelease, draft
 
       
 
   deploy:
     needs: release
     runs-on: ubuntu-18.04
-    if: success() && needs.release.outputs.status == 'true'
+    if: success() # && needs.release.outputs.status == 'true'
     steps:
       - uses: actions/checkout@v2
       
@@ -72,9 +72,8 @@ jobs:
 
       - run: tar -czvf supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz supabase-admin-api supabase-admin-api-arm64
 
-      - uses: AButler/upload-release-assets@v2.0
-        with:
-          files: 'supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz'
-          release-tag: ${{ steps.releases.outputs.release }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          
+      # - uses: AButler/upload-release-assets@v2.0
+      #   with:
+      #     files: 'supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz'
+      #     release-tag: ${{ steps.releases.outputs.release }}
+      #     repo-token: ${{ secrets.GITHUB_TOKEN }}
