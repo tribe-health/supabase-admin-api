@@ -70,11 +70,10 @@ jobs:
           repo: supabase-admin-api
           excludes: prerelease, draft
 
-      - run: tar -czvf supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz supabase-admin-api
+      - run: tar -czvf supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz supabase-admin-api supabase-admin-api-arm64
 
       - uses: AButler/upload-release-assets@v2.0
         with:
           files: 'supabase-admin-api-${{ steps.releases.outputs.release }}.tar.gz'
           release-tag: ${{ steps.releases.outputs.release }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          
