@@ -113,6 +113,10 @@ func NewAPIWithVersion(config *Config, version string) *API {
 		r.Route("/logs/{application}/{type}/{n:[0-9]*}", func(r *router) {
 			r.Get("/", api.GetLogContents)
 		})
+
+		r.Route("/cert", func(r *router) {
+			r.Post("/", api.UpdateCert)
+		})
 	})
 
 	corsHandler := cors.New(cors.Options{

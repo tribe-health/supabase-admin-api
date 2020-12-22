@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/Masterminds/semver/v3 v3.1.0 // indirect
 	github.com/PuerkitoBio/goquery v1.5.1 // indirect
+	github.com/aws/aws-sdk-go v1.36.12
 	github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible
 	github.com/cockroachdb/cockroach-go v2.0.1+incompatible // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -38,8 +39,8 @@ require (
 	github.com/subosito/gotenv v1.2.0
 	golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
-	golang.org/x/sys v0.0.0-20200728102440-3e129f6d46b1 // indirect
+	golang.org/x/net v0.0.0-20201216054612-986b41b23924 // indirect
+	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/tools v0.0.0-20200731060945-b5fad4ed8dd6 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
