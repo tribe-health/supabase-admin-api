@@ -78,12 +78,14 @@ func (a *API) UpdateCert(w http.ResponseWriter, r *http.Request) error {
 	writeToFile("/etc/kong/privKey.pem", cert.PrivKey)
 
 	// restart kong to load the new config
-	cmd := exec.Command("sudo", "systemctl", "restart", "kong.service")
-	_, err = cmd.Output()
+	// need to do command as goroutine because adminapi gets killed and can't respond
+	go func() {
+		cmd := exec.Command("sudo", "systemctl", "restart", "kong.service")
+		_, err = cmd.Output()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, err.Error())
+		}
+	}()
 
-	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
-		return sendJSON(w, http.StatusInternalServerError, err.Error())
-	}
 	return sendJSON(w, http.StatusOK, "cert updated")
 }
