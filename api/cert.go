@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/exec"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -74,5 +76,14 @@ func (a *API) UpdateCert(w http.ResponseWriter, r *http.Request) error {
 	}
 	writeToFile("/etc/kong/fullChain.pem", cert.FullChain)
 	writeToFile("/etc/kong/privKey.pem", cert.PrivKey)
-	return sendJSON(w, http.StatusOK, "hello")
+
+	// restart kong to load the new config
+	cmd := exec.Command("sudo", "systemctl", "restart", "kong.service")
+	_, err = cmd.Output()
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
+	}
+	return sendJSON(w, http.StatusOK, "cert updated")
 }
