@@ -13,7 +13,7 @@ const postgrestLogPath string = "/var/log/postgrest.stdout"
 
 const pgListenLogPath string = "/var/log/pg_listen.stdout"
 
-const gotrueLogPath string = "/var/log/postgrest.stdout"
+const gotrueLogPath string = "/var/log/gotrue.stdout"
 
 const adminAPILogPath string = "/var/log/admin-api.stdout"
 
