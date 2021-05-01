@@ -80,7 +80,7 @@ func (a *API) UpdateCert(w http.ResponseWriter, r *http.Request) error {
 	// restart kong to load the new config
 	// need to do command as goroutine because adminapi gets killed and can't respond
 	go func() {
-		cmd := exec.Command("sudo", "systemctl", "reload", "kong")
+		cmd := exec.Command("sudo", "systemctl", "reload", "kong.service")
 		_, err = cmd.Output()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, err.Error())
