@@ -40,9 +40,9 @@ GET `/config/realtime` - returns current config `{ raw_contents: <string-of-file
 
 POST `/config/realtime` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
 
-GET `/config/goauth` - returns current config as `{ raw_contents: <string-of-file-contents> }`
+GET `/config/gotrue` - returns current config as `{ raw_contents: <string-of-file-contents> }`
 
-POST `/config/goauth` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
+POST `/config/gotrue` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
 
 ### Restarting
 
