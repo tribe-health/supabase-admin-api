@@ -1,11 +1,9 @@
 package api
 
 import (
-	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"net/http"
-	"os"
-	"runtime/debug"
 )
 
 var oauthErrorMap = map[int]string{
@@ -122,27 +120,6 @@ func httpError(code int, fmtString string, args ...interface{}) *HTTPError {
 	}
 }
 
-// Recoverer is a middleware that recovers from panics, logs the panic (and a
-// backtrace), and returns a HTTP 500 (Internal Server Error) status if
-// possible. Recoverer prints a request ID if one is provided.
-func recoverer(w http.ResponseWriter, r *http.Request) (context.Context, error) {
-	defer func() {
-		if rvr := recover(); rvr != nil {
-
-			fmt.Fprintf(os.Stderr, "Panic: %+v\n", rvr)
-			debug.PrintStack()
-
-			se := &HTTPError{
-				Code:    http.StatusInternalServerError,
-				Message: http.StatusText(http.StatusInternalServerError),
-			}
-			handleError(se, w, r)
-		}
-	}()
-
-	return nil, nil
-}
-
 // ErrorCause provides error information
 type ErrorCause interface {
 	Cause() error
@@ -169,6 +146,7 @@ func handleError(err error, w http.ResponseWriter, r *http.Request) {
 	default:
 		// hide real error details from response to prevent info leaks
 		w.WriteHeader(http.StatusInternalServerError)
+		logrus.Infof("Encountered an unhandled error while servicing request. %+v\n", err)
 		if _, writeErr := w.Write([]byte(`{"code":500,"msg":"Internal server error","error_id":"` + errorID + `"}`)); writeErr != nil {
 		}
 	}

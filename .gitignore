@@ -7,3 +7,4 @@ supabase-admin-api-arm64
 .DS_Store
 .vscode
 .data
+/.idea/
