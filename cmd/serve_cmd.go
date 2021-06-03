@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"strconv"
-
+	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/supabase/supabase-admin-api/api"
+	"os"
 )
 
 var serveCmd = cobra.Command{
@@ -18,26 +17,15 @@ var serveCmd = cobra.Command{
 	},
 }
 
-func getEnv(key, fallback string) string {
-	value := os.Getenv(key)
-	if len(value) == 0 {
-		return fallback
-	}
-	return value
-}
-
 func serve() {
 	config := api.Config{}
-	config.Host = getEnv("HOST", "localhost")
-	port, _ := strconv.Atoi(getEnv("PORT", "8085"))
-	config.Port = port
-	config.Endpoint = "ENDPOINT"
-	config.RequestIDHeader = "REQUEST_ID_HEADER"
-	config.ExternalURL = "API_EXTERNAL_URL"
+	err := envconfig.Process("", &config); if err != nil {
+		logrus.Errorf("Could not read in config. %+v", err)
+		os.Exit(1)
+	}
 
-	api := api.NewAPIWithVersion(&config, Version)
-
+	createdApiInstance := api.NewAPIWithVersion(&config, Version)
 	l := fmt.Sprintf("%v:%v", config.Host, config.Port)
 	logrus.Infof("Supabase Admin API started on: %s", l)
-	api.ListenAndServe(l)
+	createdApiInstance.ListenAndServe(l)
 }

@@ -2,10 +2,10 @@ package api
 
 import (
 	"context"
+	"github.com/go-chi/chi/middleware"
 	"net/http"
 	"os"
 	"os/signal"
-	"regexp"
 	"syscall"
 	"time"
 
@@ -20,15 +20,11 @@ const (
 	defaultVersion = "unknown version"
 )
 
-var bearerRegexp = regexp.MustCompile(`^(?:B|b)earer (\S+$)`)
-
 // Config is the main API config
 type Config struct {
-	Host            string
-	Port            int `envconfig:"PORT" default:"8085"`
-	Endpoint        string
-	RequestIDHeader string `envconfig:"REQUEST_ID_HEADER"`
-	ExternalURL     string `json:"external_url" envconfig:"API_EXTERNAL_URL"`
+	Host            string `default:"localhost"`
+	Port            int `default:"8085"`
+	JwtSecret       string `required:"true" split_words:"true"`
 }
 
 // API is the main REST API
@@ -80,43 +76,56 @@ func NewAPI(config *Config) *API {
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
 	api := &API{config: config, version: version}
+	metrics, err := NewMetrics(); if err != nil {
+		panic("Couldn't initialize metrics.")
+	}
 
 	xffmw, _ := xff.Default()
 
-	r := newRouter()
-	r.UseBypass(xffmw.Handler)
-	r.Use(recoverer)
+	r := chi.NewRouter()
+	r.Use(xffmw.Handler)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
-	r.Get("/health", api.HealthCheck)
+	// unauthenticated
+	r.Group(func(r chi.Router) {
+		r.Method("GET", "/metrics", ErrorHandlingWrapper(metrics.UpdateAndGetMetrics))
+	})
 
-	r.Route("/", func(r *router) {
-		r.Route("/test", func(r *router) {
-			r.Get("/", api.TestGet)
-		})
+	// private endpoints
+	r.Group(func(r chi.Router) {
+		r.Use(api.AuthHandler)
+		r.Method("GET", "/health", ErrorHandlingWrapper(api.HealthCheck))
 
-		r.Route("/service", func(r *router) {
-			// applications are kong, pglisten, postgrest, goauth, realtime, adminapi, all
-			r.Route("/restart", func(r *router) {
-				r.Get("/", api.RestartServices)
-				r.Get("/{application}", api.RestartServices)
+		r.Route("/", func(r chi.Router) {
+			r.Route("/test", func(r chi.Router) {
+				r.Method("GET", "/", ErrorHandlingWrapper(api.TestGet))
 			})
-			r.Get("/reboot", api.RebootMachine)
-		})
 
-		// applications are kong, pglisten, postgrest, goauth, realtime, adminapi
-		r.Route("/config/{application}", func(r *router) {
-			r.Get("/", api.GetFileContents)
-			r.Post("/", api.SetFileContents)
-		})
+			r.Route("/service", func(r chi.Router) {
+				// applications are kong, pglisten, postgrest, goauth, realtime, adminapi, all
+				r.Route("/restart", func(r chi.Router) {
+					r.Method("GET", "/", ErrorHandlingWrapper(api.RestartServices))
+					r.Method("GET", "/{application}", ErrorHandlingWrapper(api.RestartServices))
+				})
+				r.Method("GET", "/reboot", ErrorHandlingWrapper(api.RebootMachine))
+			})
 
-		// applications are kong, pglisten, postgrest, goauth, realtime
-		r.Route("/logs/{application}/{type}/{n:[0-9]*}", func(r *router) {
-			r.Get("/", api.GetLogContents)
-		})
+			// applications are kong, pglisten, postgrest, goauth, realtime, adminapi
+			r.Route("/config/{application}", func(r chi.Router) {
+				r.Method("GET", "/", ErrorHandlingWrapper(api.GetFileContents))
+				r.Method("POST", "/", ErrorHandlingWrapper(api.SetFileContents))
+			})
 
-		r.Route("/cert", func(r *router) {
-			r.Post("/", api.UpdateCert)
-		})
+			// applications are kong, pglisten, postgrest, goauth, realtime
+			r.Route("/logs/{application}/{type}/{n:[0-9]*}", func(r chi.Router) {
+				r.Method("GET", "/", ErrorHandlingWrapper(api.GetLogContents))
+			})
+
+			r.Route("/cert", func(r chi.Router) {
+				r.Method("POST", "/", ErrorHandlingWrapper(api.UpdateCert))
+			})
+	})
 	})
 
 	corsHandler := cors.New(cors.Options{
