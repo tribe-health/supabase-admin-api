@@ -1,139 +1,51 @@
 package api
 
 import (
-	"bufio"
-	"context"
-	"fmt"
-	"github.com/coreos/go-systemd/dbus"
+	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/node_exporter/collector"
+	"github.com/sirupsen/logrus"
+	"github.com/supabase/supabase-admin-api/api/metrics"
+	"gopkg.in/alecthomas/kingpin.v2"
 	"net/http"
 	"os"
-	"regexp"
-	"strconv"
-	"strings"
-)
-
-var (
-	reParens = regexp.MustCompile(`\((.*)\)`)
-	namespace = "supabase"
 )
 
 type Metrics struct {
 	registry      *prometheus.Registry
-	meminfoFields map[string]prometheus.Gauge
-	rtimeMetrics  map[string]func(interface{})
 }
 
-func NewMetrics() (*Metrics, error) {
+func NewMetrics(collectors []string) (*Metrics, error) {
 	registry := prometheus.NewRegistry()
-	memTotal := prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace: namespace,
-		Name:      "memory_total_bytes",
-	})
-	memAvailable := prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace: namespace,
-		Name: "memory_available_bytes",
-	})
-	meminfo := map[string]prometheus.Gauge{
-		"MemTotal": memTotal,
-		"MemAvailable": memAvailable,
-	}
-	for _, gauge := range meminfo {
-		err := registry.Register(gauge)
-		if err != nil {
-			return nil, err
-		}
-	}
 
-	rtimeRestarts := prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace: namespace,
-		Name: "realtime_restarts_total",
-	})
-	rtimeMemory := prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace: namespace,
-		Name: "realtime_memory_bytes",
-	})
-	rtimeMetrics := map[string]func(interface{}){
-		"NRestarts": func(val interface{}) {
-			rtimeRestarts.Set(float64(val.(uint32)))
-		},
-		"MemoryCurrent": func(val interface{})  {
-			rtimeMemory.Set(float64(val.(uint64)))
-		},
-	}
-	for _, gauge := range []prometheus.Gauge{rtimeRestarts, rtimeMemory} {
-		err := registry.Register(gauge)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &Metrics{registry: registry, meminfoFields: meminfo, rtimeMetrics: rtimeMetrics}, nil
-}
-
-func (m *Metrics) UpdateRealtimeMetrics() error {
-	ctx := context.Background()
-	conn, err := dbus.NewSystemConnectionContext(ctx); if err != nil {
-		return err
-	}
-	defer conn.Close()
-	for key, consumer := range m.rtimeMetrics {
-		val, err := conn.GetServicePropertyContext(ctx, "supabase.service", key); if err != nil {
-			return err
-		}
-		consumer(val.Value.Value())
-	}
-	return nil
-}
-
-func (m *Metrics) UpdateAndGetMetrics(w http.ResponseWriter, r *http.Request) error {
-	err := m.UpdateMemoryMetrics(); if err != nil {
-		return err
-	}
-	err = m.UpdateRealtimeMetrics(); if err != nil {
-		return err
-	}
-	promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{}).ServeHTTP(w, r)
-	return nil
-}
-
-func (m *Metrics) UpdateMemoryMetrics() error {
-	file, err := os.Open("/proc/meminfo")
+	// the Parse call is a hack to get the collectors in node-exporter to register
+	_, err := kingpin.CommandLine.Parse(os.Args[1:])
 	if err != nil {
-		return err
+		// not bailing; we expect this to fail during tests, and if the underlying error matters in prod, we'll likely
+		// fail when we initialize the node-collector
+		logrus.Warnf("Error encountered during node-exporter init: %+v", err)
 	}
-	defer file.Close()
 
-	var scan = bufio.NewScanner(file)
+	logrus.Infof("Registering collectors: %+v", collectors)
+	logger := log.NewLogfmtLogger(os.Stdout)
+	node, err := collector.NewNodeCollector(logger, collectors...); if err != nil {
+		return nil, err
+	}
 
-	for scan.Scan() {
-		line := scan.Text()
-		parts := strings.Fields(line)
-		// Workaround for empty lines occasionally occur in CentOS 6.2 kernel 3.10.90.
-		if len(parts) == 0 {
-			continue
-		}
-		key := parts[0][:len(parts[0])-1] // remove trailing : from key
-		// filter down to the fields of interest, skip parsing the rest
-		gauge, ok := m.meminfoFields[key]; if !ok {
-			continue
-		}
-		// Active(anon) -> Active_anon
-		key = reParens.ReplaceAllString(key, "_${1}")
-		fv, err := strconv.ParseFloat(parts[1], 64)
+	rtime := metrics.NewRealtimeCollector()
+	for _, c := range []prometheus.Collector{node, rtime} {
+		err = registry.Register(c)
 		if err != nil {
-			return fmt.Errorf("invalid value in meminfo: %w", err)
+			return nil, err
 		}
-		switch len(parts) {
-		case 2: // no unit
-		case 3: // has unit, we presume kB
-			fv *= 1024
-			key = key + "_bytes"
-		default:
-			return fmt.Errorf("invalid line in meminfo: %s", line)
-		}
-		gauge.Set(fv)
 	}
+	return &Metrics{registry: registry}, nil
+}
 
-	return scan.Err()
+func (m *Metrics) GetHandler() http.Handler {
+	return promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{
+		ErrorLog: logrus.StandardLogger(),
+		ErrorHandling: promhttp.ContinueOnError,
+	})
 }

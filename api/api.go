@@ -2,10 +2,12 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-chi/chi/middleware"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -22,9 +24,22 @@ const (
 
 // Config is the main API config
 type Config struct {
-	Host            string `default:"localhost"`
-	Port            int `default:"8085"`
-	JwtSecret       string `required:"true" split_words:"true"`
+	Host             string `default:"localhost"`
+	Port             int    `default:"8085"`
+	JwtSecret        string `required:"true" split_words:"true"`
+	MetricCollectors string `required:"false" default:"meminfo,loadavg,cpu"`
+}
+
+func (c *Config) GetEnabledCollectors() []string {
+	splits := strings.Split(c.MetricCollectors, ",")
+	filtered := make([]string, 0)
+	for _, c := range splits {
+		if len(strings.TrimSpace(c)) == 0 {
+			continue
+		}
+		filtered = append(filtered, c)
+	}
+	return filtered
 }
 
 // API is the main REST API
@@ -76,8 +91,8 @@ func NewAPI(config *Config) *API {
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
 	api := &API{config: config, version: version}
-	metrics, err := NewMetrics(); if err != nil {
-		panic("Couldn't initialize metrics.")
+	metrics, err := NewMetrics(config.GetEnabledCollectors()); if err != nil {
+		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))
 	}
 
 	xffmw, _ := xff.Default()
@@ -89,7 +104,7 @@ func NewAPIWithVersion(config *Config, version string) *API {
 
 	// unauthenticated
 	r.Group(func(r chi.Router) {
-		r.Method("GET", "/metrics", ErrorHandlingWrapper(metrics.UpdateAndGetMetrics))
+		r.Method("GET", "/metrics", metrics.GetHandler())
 	})
 
 	// private endpoints
