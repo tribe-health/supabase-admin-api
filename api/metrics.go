@@ -20,7 +20,12 @@ func NewMetrics(collectors []string) (*Metrics, error) {
 	registry := prometheus.NewRegistry()
 
 	// the Parse call is a hack to get the collectors in node-exporter to register
-	kingpin.Parse()
+	_, err := kingpin.CommandLine.Parse(os.Args[1:])
+	if err != nil {
+		// not bailing; we expect this to fail during tests, and if the underlying error matters in prod, we'll likely
+		// fail when we initialize the node-collector
+		logrus.Warnf("Error encountered during node-exporter init: %+v", err)
+	}
 
 	logrus.Infof("Registering collectors: %+v", collectors)
 	logger := log.NewLogfmtLogger(os.Stdout)

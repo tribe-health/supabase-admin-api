@@ -31,7 +31,15 @@ type Config struct {
 }
 
 func (c *Config) GetEnabledCollectors() []string {
-	return strings.Split(c.MetricCollectors, ",")
+	splits := strings.Split(c.MetricCollectors, ",")
+	filtered := make([]string, 0)
+	for _, c := range splits {
+		if len(strings.TrimSpace(c)) == 0 {
+			continue
+		}
+		filtered = append(filtered, c)
+	}
+	return filtered
 }
 
 // API is the main REST API
