@@ -34,7 +34,7 @@ func (r *RealtimeCollector) Collect(ch chan<- prometheus.Metric) {
 	if err != nil {
 		logrus.Warnf("Failed to extract realtime nrestart %+v", err)
 	}
-	ch <- prometheus.MustNewConstMetric(r.restarts, prometheus.GaugeValue, float64(val.Value.Value().(uint32)))
+	ch <- prometheus.MustNewConstMetric(r.restarts, prometheus.CounterValue, float64(val.Value.Value().(uint32)))
 
 	val, err = conn.GetServicePropertyContext(ctx, "supabase.service", "MemoryCurrent")
 	if err != nil {
