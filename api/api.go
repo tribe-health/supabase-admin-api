@@ -24,12 +24,12 @@ const (
 
 // Config is the main API config
 type Config struct {
-	Host                   string `default:"localhost"`
-	Port                   int    `default:"8085"`
-	JwtSecret              string `required:"true" split_words:"true"`
-	MetricCollectors       string `required:"false" default:"meminfo,loadavg,cpu"`
-	GoTrueLivenessEndpoint string `required:"false" default:"http://localhost:9999/liveness"`
-	PostgrestEndpoint      string `required:"false" default:"http://localhost:3000/"`
+	Host                 string `default:"localhost"`
+	Port                 int    `default:"8085"`
+	JwtSecret            string `required:"true" split_words:"true"`
+	MetricCollectors     string `required:"false" default:"meminfo,loadavg,cpu"`
+	GotrueHealthEndpoint string `required:"false" default:"http://localhost:9999/health"`
+	PostgrestEndpoint    string `required:"false" default:"http://localhost:3000/"`
 }
 
 func (c *Config) GetEnabledCollectors() []string {
@@ -93,7 +93,7 @@ func NewAPI(config *Config) *API {
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
 	api := &API{config: config, version: version}
-	metrics, err := NewMetrics(config.GetEnabledCollectors(), config.GoTrueLivenessEndpoint, config.PostgrestEndpoint); if err != nil {
+	metrics, err := NewMetrics(config.GetEnabledCollectors(), config.GotrueHealthEndpoint, config.PostgrestEndpoint); if err != nil {
 		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))
 	}
 
