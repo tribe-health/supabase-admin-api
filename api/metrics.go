@@ -35,7 +35,7 @@ func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string) (*Me
 
 	rtime := metrics.NewRealtimeCollector()
 	gotrue := metrics.NewGotrueCollector(gotrueUrl)
-	postgrest := metrics.NewGotrueCollector(postgrestUrl)
+	postgrest := metrics.NewPostgrestCollector(postgrestUrl)
 	for _, c := range []prometheus.Collector{node, rtime, gotrue, postgrest} {
 		err = registry.Register(c)
 		if err != nil {
