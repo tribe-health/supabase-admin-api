@@ -27,7 +27,7 @@ func (c *PostgrestCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *PostgrestCollector) Collect(ch chan<- prometheus.Metric) {
-	resp, err := c.client.Get(c.url)
+	resp, err := c.client.Head(c.url)
 	status := float64(0)
 	if err == nil && resp != nil && resp.StatusCode == 200 {
 		status = float64(1)
