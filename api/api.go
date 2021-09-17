@@ -142,6 +142,10 @@ func NewAPIWithVersion(config *Config, version string) *API {
 			r.Route("/cert", func(r chi.Router) {
 				r.Method("POST", "/", ErrorHandlingWrapper(api.UpdateCert))
 			})
+
+			r.Route("/disk", func(r chi.Router) {
+				r.Method("POST", "/expand", ErrorHandlingWrapper(ExpandFilesystem))
+			})
 	})
 	})
 
