@@ -14,7 +14,7 @@ jobs:
     outputs:
       status: ${{ steps.pre-release.outputs.release != steps.post-release.outputs.release }}
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
@@ -50,32 +50,22 @@ jobs:
 
   deploy:
     needs: release
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     if: success() && needs.release.outputs.status == 'true'
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       
       - uses: actions/setup-go@v2
         with:
-          go-version: '^1.14.4' # The Go version to download (if necessary) and use.
+          go-version: '^1.17.0'
 
-      - run: make deps
-
-      - run: make all
-
-      - id: releases
-        uses: pozetroninc/github-action-get-latest-release@master
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
         with:
-          owner: supabase
-          repo: supabase-admin-api
-          excludes: prerelease, draft
-
-      - run: tar -czvf supabase-admin-api-${{ steps.releases.outputs.release }}-x86.tar.gz supabase-admin-api
-      - run: mv supabase-admin-api-arm64 supabase-admin-api
-      - run: tar -czvf supabase-admin-api-${{ steps.releases.outputs.release }}-arm64.tar.gz supabase-admin-api
-
-      - uses: AButler/upload-release-assets@v2.0
-        with:
-          files: 'supabase-admin-api-${{ steps.releases.outputs.release }}*.tar.gz'
-          release-tag: ${{ steps.releases.outputs.release }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          distribution: goreleaser
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
