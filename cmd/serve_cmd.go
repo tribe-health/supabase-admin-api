@@ -27,5 +27,6 @@ func serve() {
 	createdApiInstance := api.NewAPIWithVersion(&config, Version)
 	l := fmt.Sprintf("%v:%v", config.Host, config.Port)
 	logrus.Infof("Supabase Admin API started on: %s", l)
-	createdApiInstance.ListenAndServe(l)
+	createdApiInstance.ListenAndServe(l, config.KeyPath, config.CertPath)
 }
+

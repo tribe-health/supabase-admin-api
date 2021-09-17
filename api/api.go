@@ -30,6 +30,10 @@ type Config struct {
 	MetricCollectors     string `required:"false" default:"meminfo,loadavg,cpu"`
 	GotrueHealthEndpoint string `required:"false" default:"http://localhost:9999/health"`
 	PostgrestEndpoint    string `required:"false" default:"http://localhost:3000/"`
+
+	// supply to enable TLS termination
+	KeyPath  string `required:"false" split_words:"true"`
+	CertPath string `required:"false" split_words:"true"`
 }
 
 func (c *Config) GetEnabledCollectors() []string {
@@ -52,7 +56,7 @@ type API struct {
 }
 
 // ListenAndServe starts the REST API
-func (a *API) ListenAndServe(hostAndPort string) {
+func (a *API) ListenAndServe(hostAndPort string, keyPath string, certPath string) {
 	log := logrus.WithField("component", "api")
 	server := &http.Server{
 		Addr:    hostAndPort,
@@ -68,7 +72,15 @@ func (a *API) ListenAndServe(hostAndPort string) {
 		server.Shutdown(ctx)
 	}()
 
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+	var err error
+	if keyPath != "" && certPath != "" {
+		log.WithField("cert", certPath).WithField("key", keyPath).Info("Using TLS")
+		err = server.ListenAndServeTLS(certPath, keyPath)
+	} else {
+		log.Warn("Not using TLS!")
+		err = server.ListenAndServe()
+	}
+	if err != http.ErrServerClosed {
 		log.WithError(err).Fatal("http server listen failed")
 	}
 }
