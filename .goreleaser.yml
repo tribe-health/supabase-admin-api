@@ -1,0 +1,9 @@
+builds:
+  -
+    id: "supabase-admin-api"
+    goos:
+      - linux
+
+    goarch:
+      - amd64
+      - arm64
