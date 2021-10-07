@@ -25,7 +25,7 @@ func TestAuth(t *testing.T) {
 
 // we only expect this to work on linux
 func TestMetrics(t *testing.T) {
-	api := NewAPIWithVersion(&Config{}, "0.0")
+	api := NewAPIWithVersion(&Config{RealtimeServiceName: "supabase"}, "0.0")
 	ts := httptest.NewServer(api.handler)
 	defer ts.Close()
 
