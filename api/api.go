@@ -30,6 +30,7 @@ type Config struct {
 	MetricCollectors     string `required:"false" default:"meminfo,loadavg,cpu"`
 	GotrueHealthEndpoint string `required:"false" default:"http://localhost:9999/health"`
 	PostgrestEndpoint    string `required:"false" default:"http://localhost:3000/"`
+	RealtimeServiceName  string `required:"false" default:"supabase" split_words:"true"`
 
 	// supply to enable TLS termination
 	KeyPath  string `required:"false" split_words:"true"`
@@ -105,7 +106,8 @@ func NewAPI(config *Config) *API {
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
 	api := &API{config: config, version: version}
-	metrics, err := NewMetrics(config.GetEnabledCollectors(), config.GotrueHealthEndpoint, config.PostgrestEndpoint); if err != nil {
+	metrics, err := NewMetrics(config.GetEnabledCollectors(), config.GotrueHealthEndpoint, config.PostgrestEndpoint, config.RealtimeServiceName)
+	if err != nil {
 		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))
 	}
 

@@ -2,20 +2,23 @@ package metrics
 
 import (
 	"context"
+	"fmt"
 	"github.com/coreos/go-systemd/dbus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
 
 type RealtimeCollector struct {
-	memory *prometheus.Desc
-	restarts *prometheus.Desc
+	memory              *prometheus.Desc
+	restarts            *prometheus.Desc
+	realtimeServiceName string
 }
 
-func NewRealtimeCollector() *RealtimeCollector {
+func NewRealtimeCollector(realtimeServiceName string) *RealtimeCollector {
 	return &RealtimeCollector{
-		restarts: prometheus.NewDesc("realtime_restarts_total", "Number of times realtime has been restarted", nil, nil),
-		memory: prometheus.NewDesc("realtime_memory_bytes", "Current realtime memory usage", nil, nil),
+		restarts:            prometheus.NewDesc("realtime_restarts_total", "Number of times realtime has been restarted", nil, nil),
+		memory:              prometheus.NewDesc("realtime_memory_bytes", "Current realtime memory usage", nil, nil),
+		realtimeServiceName: fmt.Sprintf("%s.service", realtimeServiceName),
 	}
 }
 
@@ -30,13 +33,13 @@ func (r *RealtimeCollector) Collect(ch chan<- prometheus.Metric) {
 		logrus.Warnf("Failed to collect realtime info: %+v", err)
 	}
 	defer conn.Close()
-	val, err := conn.GetServicePropertyContext(ctx, "supabase.service", "NRestarts")
+	val, err := conn.GetServicePropertyContext(ctx, r.realtimeServiceName, "NRestarts")
 	if err != nil {
 		logrus.Warnf("Failed to extract realtime nrestart %+v", err)
 	}
 	ch <- prometheus.MustNewConstMetric(r.restarts, prometheus.CounterValue, float64(val.Value.Value().(uint32)))
 
-	val, err = conn.GetServicePropertyContext(ctx, "supabase.service", "MemoryCurrent")
+	val, err = conn.GetServicePropertyContext(ctx, r.realtimeServiceName, "MemoryCurrent")
 	if err != nil {
 		logrus.Warnf("Failed to extract realtime memory %+v", err)
 	}

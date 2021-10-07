@@ -47,7 +47,7 @@ func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
 		case "kong":
 			arg1 = "kong.service"
 		case "realtime":
-			arg1 = "supabase.service"
+			arg1 = fmt.Sprintf("%s.service", a.config.RealtimeServiceName)
 		case "adminapi":
 			arg1 = "adminapi.service"
 		default:

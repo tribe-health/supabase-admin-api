@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -18,8 +19,10 @@ const pgListenConfPathOld string = "/etc/old.pg_listen.conf"
 const gotrueEnvPath string = "/etc/gotrue.env"
 const gotrueEnvPathOld string = "/etc/old.gotrue.env"
 
-const realtimeEnvPath string = "/etc/supabase.env"
-const realtimeEnvPathOld string = "/etc/old.supabase.env"
+// to avoid a breaking change that needs to be synchronized across various repos, we're accepting a param for this
+// this can be removed in favour of a pre-defined const after a short transitionary period
+const realtimeEnvPathPattern string = "/etc/%s.env"
+const realtimeEnvPathOldPattern string = "/etc/old.%s.env"
 
 const kongYmlPath string = "/etc/kong/kong.yml"
 const kongYmlPathOld string = "/etc/kong/old.kong.yml"
@@ -50,7 +53,7 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 	case "kong":
 		configFilePath = kongYmlPath
 	case "realtime":
-		configFilePath = realtimeEnvPath
+		configFilePath = fmt.Sprintf(realtimeEnvPathPattern, a.config.RealtimeServiceName)
 	case "adminapi":
 		configFilePath = adminapiEnvPath
 	}
@@ -88,8 +91,8 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 		configFilePath = kongYmlPath
 		configFilePathOld = kongYmlPathOld
 	case "realtime":
-		configFilePath = realtimeEnvPath
-		configFilePathOld = realtimeEnvPathOld
+		configFilePath = fmt.Sprintf(realtimeEnvPathPattern, a.config.RealtimeServiceName)
+		configFilePathOld = fmt.Sprintf(realtimeEnvPathOldPattern, a.config.RealtimeServiceName)
 	case "adminapi":
 		configFilePath = adminapiEnvPath
 		configFilePathOld = adminapiEnvPathOld
