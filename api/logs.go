@@ -11,11 +11,11 @@ import (
 
 const postgrestService string = "postgrest.service"
 
-const pgListenService string = "pg_listen.service"
+const pgListenService string = "pglisten.service"
 
 const gotrueService string = "gotrue.service"
 
-const adminAPIService string = "admin-api.service"
+const adminAPIService string = "adminapi.service"
 
 const realtimeService string = "realtime.service"
 
