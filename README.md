@@ -52,6 +52,10 @@ GET `/services/reboot` - reboot the server
 
 ### Logs
 
+requires that journeld be installed and the adminapi user is in the linux group systemd-journal e.g.
+
+`sudo usermod -a -G systemd-journal adminapi`
+
 GET `/logs/<application>/<head|tail>/<max_lines>` - get logs for a given application (postgrest,kong,admin,gotrue,syslog,pglisten)
 
 ## Sponsors
