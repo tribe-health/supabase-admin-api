@@ -9,20 +9,20 @@ import (
 	"github.com/go-chi/chi"
 )
 
-const postgrestLogPath string = "/var/log/postgrest.stdout"
+const postgrestService string = "postgrest.service"
 
-const pgListenLogPath string = "/var/log/pg_listen.stdout"
+const pgListenService string = "pglisten.service"
 
-const gotrueLogPath string = "/var/log/gotrue.stdout"
+const gotrueService string = "gotrue.service"
 
-const adminAPILogPath string = "/var/log/admin-api.stdout"
+const adminAPIService string = "adminapi.service"
 
-const realtimeLogPath string = "/var/log/supabase.stdout"
+const realtimeService string = "realtime.service"
 
-const kongLogPath string = "/usr/local/kong/logs/access.log"
-const kongErrorLogPath string = "/usr/local/kong/logs/error.log"
+const kongService string = "kong.service"
+const kongErrorService string = "kong.service"
 
-const syslogPath string = "/var/log/syslog"
+const sysService string = "services.slice"
 
 // GetLogContents is the method for returning the contents of a given log file
 func (a *API) GetLogContents(w http.ResponseWriter, r *http.Request) error {
@@ -35,44 +35,44 @@ func (a *API) GetLogContents(w http.ResponseWriter, r *http.Request) error {
 	n := chi.URLParam(r, "n")
 
 	// default is concatenate entire file
-	app := "tail"
+	reverseArg := "-r"
 	arg0 := "-n"
 	arg1 := "100"
-	logFilePath := syslogPath
+	serviceName := sysService
 
 	switch application {
 	case "test":
-		logFilePath = "./README.md"
+		serviceName = "./README.md"
 	case "gotrue":
-		logFilePath = gotrueLogPath
+		serviceName = gotrueService
 	case "postgrest":
-		logFilePath = postgrestLogPath
+		serviceName = postgrestService
 	case "pglisten":
-		logFilePath = pgListenLogPath
+		serviceName = pgListenService
 	case "kong":
-		logFilePath = kongLogPath
+		serviceName = kongService
 	case "kong-error":
-		logFilePath = kongErrorLogPath
+		serviceName = kongErrorService
 	case "realtime":
-		logFilePath = realtimeLogPath
+		serviceName = realtimeService
 	case "admin":
-		logFilePath = adminAPILogPath
+		serviceName = adminAPIService
 	case "syslog":
-		logFilePath = syslogPath
+		serviceName = sysService
 	}
 
 	switch fetchType {
 	case "head":
-		app = "head"
+		reverseArg = "--no-pager" // no-op
 		arg0 = "-n"
 		arg1 = n
 	case "tail":
-		app = "tail"
+		reverseArg = "-r"
 		arg0 = "-n"
 		arg1 = n
 	}
 
-	cmd := exec.Command(app, arg0, arg1, logFilePath)
+	cmd := exec.Command("journalctl", "-u", serviceName, reverseArg, arg0, arg1, "--no-pager")
 	stdout, err := cmd.Output()
 
 	if err != nil {
