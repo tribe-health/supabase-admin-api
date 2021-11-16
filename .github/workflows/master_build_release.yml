@@ -42,7 +42,7 @@ jobs:
   deploy:
     needs: release
     runs-on: ubuntu-20.04
-    if: success() && needs.release.outputs.status == 'true'
+    if: success()
     steps:
       - uses: actions/checkout@v2
         with:
