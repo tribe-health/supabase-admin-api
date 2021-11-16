@@ -9,20 +9,20 @@ import (
 	"github.com/go-chi/chi"
 )
 
-const postgrestService string = "/var/log/postgrest.stdout"
+const postgrestService string = "postgrest.service"
 
-const pgListenService string = "/var/log/pg_listen.stdout"
+const pgListenService string = "pg_listen.service"
 
-const gotrueService string = "/var/log/gotrue.stdout"
+const gotrueService string = "gotrue.service"
 
-const adminAPIService string = "/var/log/admin-api.stdout"
+const adminAPIService string = "admin-api.service"
 
-const realtimeService string = "/var/log/realtime.stdout"
+const realtimeService string = "realtime.service"
 
-const kongService string = "/usr/local/kong/logs/access.log"
-const kongErrorService string = "/usr/local/kong/logs/error.log"
+const kongService string = "kong.service"
+const kongErrorService string = "kong.service"
 
-const sysService string = "/var/log/syslog"
+const sysService string = "services.slice"
 
 // GetLogContents is the method for returning the contents of a given log file
 func (a *API) GetLogContents(w http.ResponseWriter, r *http.Request) error {
