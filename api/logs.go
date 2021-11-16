@@ -63,14 +63,13 @@ func (a *API) GetLogContents(w http.ResponseWriter, r *http.Request) error {
 
 	switch fetchType {
 	case "head":
-		reverseArg = ""
+		reverseArg = "--no-pager" // no-op
 		arg0 = "-n"
 		arg1 = n
 	case "tail":
-		reverseArg = "tail"
+		reverseArg = "-r"
 		arg0 = "-n"
 		arg1 = n
-		reverseArg = "-r"
 	}
 
 	cmd := exec.Command("journalctl", "-u", serviceName, reverseArg, arg0, arg1, "--no-pager")
