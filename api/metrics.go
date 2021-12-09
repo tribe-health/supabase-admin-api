@@ -16,7 +16,7 @@ type Metrics struct {
 	registry *prometheus.Registry
 }
 
-func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string, realtimeServiceName string) (*Metrics, error) {
+func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string) (*Metrics, error) {
 	registry := prometheus.NewRegistry()
 
 	// the Parse call is a hack to get the collectors in node-exporter to register
@@ -33,7 +33,7 @@ func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string, real
 		return nil, err
 	}
 
-	rtime := metrics.NewRealtimeCollector(realtimeServiceName)
+	rtime := metrics.NewRealtimeCollector()
 	gotrue := metrics.NewGotrueCollector(gotrueUrl)
 	postgrest := metrics.NewPostgrestCollector(postgrestUrl)
 	for _, c := range []prometheus.Collector{node, rtime, gotrue, postgrest} {

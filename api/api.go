@@ -106,7 +106,7 @@ func NewAPI(config *Config) *API {
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
 	api := &API{config: config, version: version}
-	metrics, err := NewMetrics(config.GetEnabledCollectors(), config.GotrueHealthEndpoint, config.PostgrestEndpoint, config.RealtimeServiceName)
+	metrics, err := NewMetrics(config.GetEnabledCollectors(), config.GotrueHealthEndpoint, config.PostgrestEndpoint)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))
 	}
