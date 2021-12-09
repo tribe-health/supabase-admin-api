@@ -7,6 +7,9 @@ go 1.14
 require (
 	github.com/alecthomas/units v0.0.0-20210208195552-ff826a37aa15 // indirect
 	github.com/aws/aws-sdk-go v1.36.12
+	github.com/aws/aws-sdk-go-v2 v1.11.2 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.11.0 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.8.2 // indirect
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v4.1.2+incompatible
