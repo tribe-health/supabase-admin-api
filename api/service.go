@@ -50,6 +50,10 @@ func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
 			arg1 = fmt.Sprintf("%s.service", a.config.RealtimeServiceName)
 		case "adminapi":
 			arg1 = "adminapi.service"
+		case "postgresql":
+			arg1 = derivePostgresqlUnitName()
+		case "pgbouncer":
+			arg1 = "pgbouncer.service"
 		default:
 			arg1 = "services.slice"
 		}
@@ -70,6 +74,15 @@ func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
 	}()
 
 	return sendJSON(w, http.StatusOK, 200)
+}
+
+func derivePostgresqlUnitName() string {
+	_, err:= os.Stat("/etc/postgresql/postgresql.conf")
+	if err != nil {
+		return "postgresql.service"
+	} else {
+		return "postgresql@12.service"
+	}
 }
 
 // RebootMachine is the endpoint for fetching current goauth email config
