@@ -27,6 +27,7 @@ func GetInstanceType(ctx context.Context) (*InstanceType, error) {
 }
 
 type InstanceType = string
+const FallbackInstanceType = "m6g.medium"
 
 func generateSettings(settings interface{}) (*string, error) {
 	var buffer bytes.Buffer

@@ -1,6 +1,6 @@
 package optimizations
 
-import "fmt"
+import "github.com/sirupsen/logrus"
 
 type ServerSettings struct {
 	CheckpointCompletionTarget    float32 `conf:"checkpoint_completion_target"`
@@ -137,7 +137,8 @@ var (
 func OptimizePostgres(destinationFile string, instanceType InstanceType) error {
 	settings, ok := ServerRecommendations[instanceType]
 	if !ok {
-		return fmt.Errorf("don't have recommended settings for instance type '%s'", instanceType)
+		logrus.WithField("instanceType", instanceType).Warn("Using fallback recommendations.")
+		settings, _ = ServerRecommendations[FallbackInstanceType]
 	}
 	return writeRecommendationsToFile(&settings, destinationFile)
 }

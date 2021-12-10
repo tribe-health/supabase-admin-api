@@ -1,7 +1,7 @@
 package optimizations
 
 import (
-	"fmt"
+	"github.com/sirupsen/logrus"
 )
 
 type PostgrestServerSettings struct {
@@ -34,7 +34,8 @@ var (
 func OptimizePostgrest(destinationFile string, instanceType InstanceType) error {
 	settings, ok := PostgrestServerRecommendations[instanceType]
 	if !ok {
-		return fmt.Errorf("don't have recommended settings for instance type '%s'", instanceType)
+		logrus.WithField("instanceType", instanceType).Warn("Using fallback recommendations.")
+		settings, _ = PostgrestServerRecommendations[FallbackInstanceType]
 	}
 	return writeRecommendationsToFile(settings, destinationFile)
 }
