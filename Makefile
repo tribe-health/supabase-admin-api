@@ -1,6 +1,5 @@
 .PHONY: all build deps image lint migrate test vet
 CHECK_FILES?=$$(go list ./... | grep -v /vendor/)
-FLAGS?=-ldflags "-X github.com/supabase/supabase-admin-api/cmd.Version=`git rev-parse HEAD`"
 
 help: ## Show this help.
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {sub("\\\\n",sprintf("\n%22c"," "), $$2);printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -8,6 +7,7 @@ help: ## Show this help.
 all: lint vet test build ## Run the tests and build the binary.
 
 build: ## Build the binary.
+	echo $$(git describe --tags --always --first-parent --dirty) > cmd/VERSION
 	go build $(FLAGS)
 	GOOS=linux GOARCH=arm64 go build $(FLAGS) -o supabase-admin-api-arm64
 
