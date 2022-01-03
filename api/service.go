@@ -77,11 +77,11 @@ func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
 }
 
 func derivePostgresqlUnitName() string {
-	_, err:= os.Stat("/etc/postgresql/postgresql.conf")
+	_, err := os.Stat("/etc/postgresql/postgresql.conf")
 	if err != nil {
-		return "postgresql.service"
+		return "postgresql@12-main.service"
 	} else {
-		return "postgresql@12.service"
+		return "postgresql.service"
 	}
 }
 
