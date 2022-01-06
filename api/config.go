@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi"
 )
 
-const postgrestConfPath string = "/etc/postgrest.conf"
-const postgrestConfPathOld string = "/etc/old.postgrest.conf"
+const postgrestConfPath string = "/etc/postgrest/base.conf"
+const postgrestConfPathOld string = "/etc/postgrest/old.base.conf"
 
 const pgListenConfPath string = "/etc/pg_listen.conf"
 const pgListenConfPathOld string = "/etc/old.pg_listen.conf"
