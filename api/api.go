@@ -27,7 +27,7 @@ type Config struct {
 	Host                 string `default:"localhost"`
 	Port                 int    `default:"8085"`
 	JwtSecret            string `required:"true" split_words:"true"`
-	MetricCollectors     string `required:"false" default:"meminfo,loadavg,cpu"`
+	MetricCollectors     string `required:"false" default:"filesystem,meminfo,netdev,loadavg,cpu" split_words:"true"`
 	GotrueHealthEndpoint string `required:"false" default:"http://localhost:9999/health"`
 	PostgrestEndpoint    string `required:"false" default:"http://localhost:3000/"`
 	RealtimeServiceName  string `required:"false" default:"supabase" split_words:"true"`
