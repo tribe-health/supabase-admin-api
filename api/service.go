@@ -10,6 +10,35 @@ import (
 	"github.com/go-chi/chi"
 )
 
+type LifecycleCommand = string
+
+const LifecycleCommandHeader = "X-Supabase-Lifecycle"
+
+const (
+	Stop    LifecycleCommand = "stop"
+	Start                    = "start"
+	Restart                  = "restart"
+)
+
+// we default to a restart unless a suitable override is provided
+func getLifecycleCommand(r *http.Request) (LifecycleCommand, error) {
+	vals, ok := r.Header[LifecycleCommandHeader]
+	if !ok || len(vals) == 0 {
+		return Restart, nil
+	}
+	if len(vals) > 1 {
+		return Restart, fmt.Errorf("only a single lifecycle command was expected: %+v", vals)
+	}
+	switch vals[0] {
+	case Start:
+		return Start, nil
+	case Stop:
+		return Stop, nil
+	default:
+		return Restart, fmt.Errorf("unknown lifecycle command: %+v", vals[0])
+	}
+}
+
 // RestartServices is the endpoint for fetching current goauth email config
 func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
 	sudo := "sudo"
@@ -26,11 +55,16 @@ func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
 
 	fmt.Fprintf(os.Stdout, string(stdout))
 
+	lifecycleCommand, err := getLifecycleCommand(r)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		return sendJSON(w, http.StatusBadRequest, err.Error())
+	}
+
 	// need to do command as goroutine because adminapi gets killed and can't respond
 	go func() {
 		sudo := "sudo"
 		app := "systemctl"
-		arg0 := "restart"
 		var arg1 string
 
 		application := chi.URLParam(r, "application")
@@ -63,7 +97,7 @@ func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
 			time.Sleep(2 * time.Second)
 		}
 
-		cmd = exec.Command(sudo, app, arg0, arg1)
+		cmd = exec.Command(sudo, app, lifecycleCommand, arg1)
 		stdout, err = cmd.Output()
 
 		if err != nil {
