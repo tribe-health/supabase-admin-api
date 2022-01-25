@@ -7,9 +7,9 @@ import (
 )
 
 type PostgrestCollector struct {
-	up *prometheus.Desc
+	up     *prometheus.Desc
 	client *http.Client
-	url string
+	url    string
 }
 
 func NewPostgrestCollector(postgrestUrl string) *PostgrestCollector {

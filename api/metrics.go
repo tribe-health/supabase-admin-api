@@ -1,7 +1,8 @@
 package api
 
 import (
-	"github.com/go-kit/log"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/node_exporter/collector"
@@ -16,11 +17,11 @@ type Metrics struct {
 	registry *prometheus.Registry
 }
 
-func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string) (*Metrics, error) {
+func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string, nodeExporterAdditionalArgs []string) (*Metrics, error) {
 	registry := prometheus.NewRegistry()
 
 	// the Parse call is a hack to get the collectors in node-exporter to register
-	_, err := kingpin.CommandLine.Parse(os.Args[1:])
+	_, err := kingpin.CommandLine.Parse(nodeExporterAdditionalArgs)
 	if err != nil {
 		// not bailing; we expect this to fail during tests, and if the underlying error matters in prod, we'll likely
 		// fail when we initialize the node-collector
@@ -29,7 +30,9 @@ func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string) (*Me
 
 	logrus.Infof("Registering collectors: %+v", collectors)
 	logger := log.NewLogfmtLogger(os.Stdout)
-	node, err := collector.NewNodeCollector(logger, collectors...); if err != nil {
+	filteredLogger := level.NewFilter(logger, level.AllowInfo())
+	node, err := collector.NewNodeCollector(filteredLogger, collectors...)
+	if err != nil {
 		return nil, err
 	}
 
@@ -47,7 +50,7 @@ func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string) (*Me
 
 func (m *Metrics) GetHandler() http.Handler {
 	return promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{
-		ErrorLog: logrus.StandardLogger(),
+		ErrorLog:      logrus.StandardLogger(),
 		ErrorHandling: promhttp.ContinueOnError,
 	})
 }

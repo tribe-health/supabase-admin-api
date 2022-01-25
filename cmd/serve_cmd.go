@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/supabase/supabase-admin-api/api"
-	"os"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
 )
 
 var serveCmd = cobra.Command{
@@ -18,10 +18,14 @@ var serveCmd = cobra.Command{
 }
 
 func serve() {
-	config := api.Config{}
-	err := envconfig.Process("", &config); if err != nil {
-		logrus.Errorf("Could not read in config. %+v", err)
-		os.Exit(1)
+	bytes, err := ioutil.ReadFile(serverConfigFilePath)
+	if err != nil {
+		logrus.Fatalf("failed to read in config: %q", err)
+	}
+	var config api.Config
+	err = yaml.Unmarshal(bytes, &config)
+	if err != nil {
+		logrus.Fatalf("could not parse config: %q", err)
 	}
 
 	createdApiInstance := api.NewAPIWithVersion(&config, Version)
@@ -29,4 +33,3 @@ func serve() {
 	logrus.Infof("Supabase Admin API started on: %s", l)
 	createdApiInstance.ListenAndServe(l, config.KeyPath, config.CertPath)
 }
-

@@ -10,7 +10,10 @@ import (
 
 func TestAuth(t *testing.T) {
 	api := NewAPIWithVersion(&Config{
-		JwtSecret: "awdawdawdawdawdaw",
+		JwtSecret:                      "awdawdawdawdawdaw",
+		UpstreamMetricsRefreshDuration: "60s",
+		Port:                           8085,
+		Host:                           "localhost",
 	}, "0.0")
 	ts := httptest.NewServer(api.handler)
 	defer ts.Close()
@@ -25,7 +28,12 @@ func TestAuth(t *testing.T) {
 
 // we only expect this to work on linux
 func TestMetrics(t *testing.T) {
-	api := NewAPIWithVersion(&Config{RealtimeServiceName: "supabase"}, "0.0")
+	api := NewAPIWithVersion(&Config{
+		RealtimeServiceName:            "supabase",
+		UpstreamMetricsRefreshDuration: "60s",
+		Port:                           8085,
+		Host:                           "localhost",
+	}, "0.0")
 	ts := httptest.NewServer(api.handler)
 	defer ts.Close()
 

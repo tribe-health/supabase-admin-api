@@ -2,12 +2,15 @@ package api
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"github.com/bluele/gcache"
 	"github.com/go-chi/chi/middleware"
+	"github.com/prometheus/common/expfmt"
+	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -24,36 +27,54 @@ const (
 
 // Config is the main API config
 type Config struct {
-	Host                 string `default:"localhost"`
-	Port                 int    `default:"8085"`
-	JwtSecret            string `required:"true" split_words:"true"`
-	MetricCollectors     string `required:"false" default:"filesystem,meminfo,netdev,loadavg,cpu" split_words:"true"`
-	GotrueHealthEndpoint string `required:"false" default:"http://localhost:9999/health"`
-	PostgrestEndpoint    string `required:"false" default:"http://localhost:3000/"`
-	RealtimeServiceName  string `required:"false" default:"supabase" split_words:"true"`
+	Host                           string                        `yaml:"host" default:"localhost"`
+	Port                           int                           `yaml:"port" default:"8085"`
+	JwtSecret                      string                        `yaml:"jwt_secret" required:"true"`
+	MetricCollectors               []string                      `yaml:"metric_collectors" required:"true"`
+	GotrueHealthEndpoint           string                        `yaml:"gotrue_health_endpoint" required:"false" default:"http://localhost:9999/health"`
+	PostgrestEndpoint              string                        `yaml:"postgrest_endpoint" required:"false" default:"http://localhost:3000/"`
+	RealtimeServiceName            string                        `yaml:"realtime_service_name" required:"false" default:"supabase"`
+	UpstreamMetricsSources         []metrics.MetricsSourceConfig `yaml:"upstream_metrics_sources" required:"true"`
+	NodeExporterAdditionalArgs     []string                      `yaml:"node_exporter_additional_args" required:"false"`
+	UpstreamMetricsRefreshDuration string                        `yaml:"upstream_metrics_refresh_duration" default:"60s"`
 
 	// supply to enable TLS termination
-	KeyPath  string `required:"false" split_words:"true"`
-	CertPath string `required:"false" split_words:"true"`
+	KeyPath  string `yaml:"key_path" required:"false"`
+	CertPath string `yaml:"cert_path" required:"false"`
 }
 
-func (c *Config) GetEnabledCollectors() []string {
-	splits := strings.Split(c.MetricCollectors, ",")
-	filtered := make([]string, 0)
-	for _, c := range splits {
-		if len(strings.TrimSpace(c)) == 0 {
-			continue
+func (c *Config) GetMetricsSources() []metrics.MetricsSource {
+	logger := logrus.New()
+	var parser expfmt.TextParser
+	sources := make([]metrics.MetricsSource, 0)
+	for _, config := range c.UpstreamMetricsSources {
+		client := http.Client{
+			Timeout: 1 * time.Second,
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: config.SkipTlsVerify,
+				},
+			},
 		}
-		filtered = append(filtered, c)
+		sourceLogger := logger.WithField("source", config.Name)
+		source := metrics.MetricsSource{
+			Config:     config,
+			HttpClient: &client,
+			Logger:     sourceLogger,
+			Parser:     &parser,
+		}
+		logger.Infof("Creating source for %+v", config)
+		sources = append(sources, source)
 	}
-	return filtered
+	return sources
 }
 
 // API is the main REST API
 type API struct {
-	handler http.Handler
-	config  *Config
-	version string
+	handler        http.Handler
+	config         *Config
+	version        string
+	metricsSources []metrics.MetricsSource
 }
 
 // ListenAndServe starts the REST API
@@ -98,19 +119,24 @@ func waitForTermination(log logrus.FieldLogger, done <-chan struct{}) {
 	}
 }
 
-// NewAPI instantiates a new REST API
-func NewAPI(config *Config) *API {
-	return NewAPIWithVersion(config, defaultVersion)
-}
-
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
 	api := &API{config: config, version: version}
-	metrics, err := NewMetrics(config.GetEnabledCollectors(), config.GotrueHealthEndpoint, config.PostgrestEndpoint)
+	nodeMetrics, err := NewMetrics(config.MetricCollectors, config.GotrueHealthEndpoint, config.PostgrestEndpoint, config.NodeExporterAdditionalArgs)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))
 	}
 
+	projectMetrics := metrics.Metrics{
+		Sources: config.GetMetricsSources(),
+	}
+	duration, err := time.ParseDuration(config.UpstreamMetricsRefreshDuration)
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to parse metrics refresh duration")
+	}
+	cache := gcache.New(1).Expiration(duration).LoaderFunc(func(_ interface{}) (interface{}, error) {
+		return projectMetrics.GetMergedMetrics(), nil
+	}).Build()
 	xffmw, _ := xff.Default()
 
 	r := chi.NewRouter()
@@ -120,13 +146,14 @@ func NewAPIWithVersion(config *Config, version string) *API {
 
 	// unauthenticated
 	r.Group(func(r chi.Router) {
-		r.Method("GET", "/metrics", metrics.GetHandler())
+		r.Method("GET", "/metrics", nodeMetrics.GetHandler())
 	})
 
 	// private endpoints
 	r.Group(func(r chi.Router) {
 		r.Use(api.AuthHandler)
 		r.Method("GET", "/health", ErrorHandlingWrapper(api.HealthCheck))
+		r.Method("GET", "/upstream/metrics", ErrorHandlingWrapper(api.ServeUpstreamMetrics(cache.Get)))
 
 		r.Route("/", func(r chi.Router) {
 			r.Route("/test", func(r chi.Router) {
@@ -160,7 +187,7 @@ func NewAPIWithVersion(config *Config, version string) *API {
 			r.Route("/disk", func(r chi.Router) {
 				r.Method("POST", "/expand", ErrorHandlingWrapper(ExpandFilesystem))
 			})
-	})
+		})
 	})
 
 	corsHandler := cors.New(cors.Options{
