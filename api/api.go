@@ -147,13 +147,13 @@ func NewAPIWithVersion(config *Config, version string) *API {
 	// unauthenticated
 	r.Group(func(r chi.Router) {
 		r.Method("GET", "/metrics", nodeMetrics.GetHandler())
+		r.Method("GET", "/project-metrics", ErrorHandlingWrapper(api.ServeUpstreamMetrics(cache.Get)))
 	})
 
 	// private endpoints
 	r.Group(func(r chi.Router) {
 		r.Use(api.AuthHandler)
 		r.Method("GET", "/health", ErrorHandlingWrapper(api.HealthCheck))
-		r.Method("GET", "/upstream/metrics", ErrorHandlingWrapper(api.ServeUpstreamMetrics(cache.Get)))
 
 		r.Route("/", func(r chi.Router) {
 			r.Route("/test", func(r chi.Router) {
