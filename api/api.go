@@ -147,12 +147,17 @@ func NewAPIWithVersion(config *Config, version string) *API {
 	// unauthenticated
 	r.Group(func(r chi.Router) {
 		r.Method("GET", "/metrics", nodeMetrics.GetHandler())
-		r.Method("GET", "/project-metrics", ErrorHandlingWrapper(api.ServeUpstreamMetrics(cache.Get)))
+	})
+
+	// authenticated but available for users
+	r.Group(func(r chi.Router) {
+		r.Use(api.RoleValidatingAuthHandler(Service))
+		r.Method("GET", "/privileged/project-metrics", ErrorHandlingWrapper(api.ServeUpstreamMetrics(cache.Get)))
 	})
 
 	// private endpoints
 	r.Group(func(r chi.Router) {
-		r.Use(api.AuthHandler)
+		r.Use(api.RoleValidatingAuthHandler(SupabaseAdmin))
 		r.Method("GET", "/health", ErrorHandlingWrapper(api.HealthCheck))
 
 		r.Route("/", func(r chi.Router) {
