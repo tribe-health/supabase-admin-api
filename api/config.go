@@ -24,8 +24,8 @@ const realtimeEnvPathOldPattern string = "/etc/old.realtime.env"
 const kongYmlPath string = "/etc/kong/kong.yml"
 const kongYmlPathOld string = "/etc/kong/old.kong.yml"
 
-const adminapiEnvPath string = "/etc/adminapi.env"
-const adminapiEnvPathOld string = "/etc/old.adminapi.env"
+const adminapiEnvPath string = "/etc/adminapi/adminapi.yaml"
+const adminapiEnvPathOld string = "/etc/adminapi/old.adminapi.yaml"
 
 // FileContents holds the content of a config file
 type FileContents struct {
