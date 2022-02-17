@@ -22,14 +22,14 @@ func RestoreDatabase(w http.ResponseWriter, r *http.Request) error {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-	var cmd *Cmd
+	var cmd *exec.Cmd
 	if params.RecoveryTargetTime {
 		cmd = exec.Command("/bin/sh", "-c", "sudo /root/commence_walg_restore.sh", params.BackupName, params.RecoveryTargetTime)
 	} else{
 		cmd = exec.Command("/bin/sh", "-c", "sudo /root/commence_walg_restore.sh", params.BackupName)
 	}
 	output, err := cmd.Output()
-	
+
 	if err != nil {
 		return errors.Wrap(err, "failed to execute WAL-G restoration")
 	}
