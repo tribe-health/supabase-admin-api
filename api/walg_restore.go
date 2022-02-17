@@ -23,7 +23,7 @@ func RestoreDatabase(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	var cmd *exec.Cmd
-	if params.RecoveryTargetTime {
+	if len(params.RecoveryTargetTime) == 0 {
 		cmd = exec.Command("/bin/sh", "-c", "sudo /root/commence_walg_restore.sh", params.BackupName, params.RecoveryTargetTime)
 	} else{
 		cmd = exec.Command("/bin/sh", "-c", "sudo /root/commence_walg_restore.sh", params.BackupName)
