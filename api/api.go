@@ -192,6 +192,11 @@ func NewAPIWithVersion(config *Config, version string) *API {
 			r.Route("/disk", func(r chi.Router) {
 				r.Method("POST", "/expand", ErrorHandlingWrapper(ExpandFilesystem))
 			})
+
+			r.Route("/database", func(r chi.Router) {
+				r.Method("POST", "/backup", ErrorHandlingWrapper(BackupDatabase))
+				r.Method("POST", "/restore", ErrorHandlingWrapper(RestoreDatabase))
+			})
 		})
 	})
 
