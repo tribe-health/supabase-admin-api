@@ -1,6 +1,8 @@
 package api
 
 import (
+	"github.com/sirupsen/logrus"
+	"github.com/supabase/supabase-admin-api/api/firewall"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,6 +16,11 @@ func TestAuth(t *testing.T) {
 		UpstreamMetricsRefreshDuration: "60s",
 		Port:                           8085,
 		Host:                           "localhost",
+		Firewall: firewall.Config{
+			PrivilegedPorts:          []int{22},
+			CustomerPorts:            []int{443},
+			PrivilegedPortsWhitelist: []string{"0.0.0.0/0"},
+		},
 	}, "0.0")
 	ts := httptest.NewServer(api.handler)
 	defer ts.Close()
@@ -33,12 +40,39 @@ func TestMetrics(t *testing.T) {
 		UpstreamMetricsRefreshDuration: "60s",
 		Port:                           8085,
 		Host:                           "localhost",
+		Firewall: firewall.Config{
+			PrivilegedPorts:          []int{22},
+			CustomerPorts:            []int{443},
+			PrivilegedPortsWhitelist: []string{"0.0.0.0/0"},
+		},
 	}, "0.0")
 	ts := httptest.NewServer(api.handler)
 	defer ts.Close()
 
 	if response, _ := testRequest(t, ts, "GET", "/metrics", nil, false); response.StatusCode != 200 {
 		t.Fatalf("Metrics request should've succeeded %+v", response.StatusCode)
+	}
+}
+
+func TestFirewallConfigRequired(t *testing.T) {
+
+	defer func() { logrus.StandardLogger().ExitFunc = nil }()
+	var fatal bool
+	logrus.StandardLogger().ExitFunc = func(int) { fatal = true }
+
+	_ = NewAPIWithVersion(&Config{
+		RealtimeServiceName:            "supabase",
+		UpstreamMetricsRefreshDuration: "60s",
+		Port:                           8085,
+		Host:                           "localhost",
+		Firewall: firewall.Config{
+			PrivilegedPorts:          []int{},
+			CustomerPorts:            []int{443},
+			PrivilegedPortsWhitelist: []string{"0.0.0.0/0"},
+		},
+	}, "0.0")
+	if fatal != true {
+		t.Fatal("creation of API server should've failed")
 	}
 }
 

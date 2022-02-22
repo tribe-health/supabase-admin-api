@@ -7,6 +7,7 @@ import (
 	"github.com/bluele/gcache"
 	"github.com/go-chi/chi/middleware"
 	"github.com/prometheus/common/expfmt"
+	"github.com/supabase/supabase-admin-api/api/firewall"
 	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
 	"net/http"
 	"os"
@@ -37,6 +38,7 @@ type Config struct {
 	UpstreamMetricsSources         []metrics.MetricsSourceConfig `yaml:"upstream_metrics_sources" required:"true"`
 	NodeExporterAdditionalArgs     []string                      `yaml:"node_exporter_additional_args" required:"false"`
 	UpstreamMetricsRefreshDuration string                        `yaml:"upstream_metrics_refresh_duration" default:"60s"`
+	Firewall                       firewall.Config               `yaml:"firewall" required:"true"`
 
 	// supply to enable TLS termination
 	KeyPath  string `yaml:"key_path" required:"false"`
@@ -139,6 +141,10 @@ func NewAPIWithVersion(config *Config, version string) *API {
 	}).Build()
 	xffmw, _ := xff.Default()
 
+	firewallManager, err := config.Firewall.CreateFirewallManager()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to initialize firewall manager")
+	}
 	r := chi.NewRouter()
 	r.Use(xffmw.Handler)
 	r.Use(middleware.Logger)
@@ -191,6 +197,10 @@ func NewAPIWithVersion(config *Config, version string) *API {
 
 			r.Route("/disk", func(r chi.Router) {
 				r.Method("POST", "/expand", ErrorHandlingWrapper(ExpandFilesystem))
+			})
+
+			r.Route("/firewall", func(r chi.Router) {
+				r.Method("POST", "/apply", ErrorHandlingWrapper(firewallManager.HandleRequest))
 			})
 		})
 	})
