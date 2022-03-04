@@ -193,10 +193,10 @@ func NewAPIWithVersion(config *Config, version string) *API {
 				r.Method("POST", "/expand", ErrorHandlingWrapper(ExpandFilesystem))
 			})
 
-			r.Route("/database", func(r chi.Router) {
+			r.Route("/walg", func(r chi.Router) {
 				r.Method("POST", "/backup", ErrorHandlingWrapper(BackupDatabase))
-				r.Method("POST", "/restore", ErrorHandlingWrapper(RestoreDatabase))
-				r.Method("POST", "/disable-restore", ErrorHandlingWrapper(DisableRestore))
+				r.Method("POST", "/enable", ErrorHandlingWrapper(EnableWALG))
+				r.Method("POST", "/disable", ErrorHandlingWrapper(DisableWALG))
 			})
 		})
 	})
