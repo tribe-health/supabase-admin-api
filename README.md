@@ -44,6 +44,18 @@ GET `/config/gotrue` - returns current config as `{ raw_contents: <string-of-fil
 
 POST `/config/gotrue` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
 
+GET `/config/walg` - returns current config as `{ raw_contents: <string-of-file-contents> }`
+
+POST `/config/walg` - sets new config - params: `{ raw_contents: <string-of-file-contents>, restart_services : <bool> }`
+
+### WAL-G
+
+POST `/walg/enable` - Enable the sending of WAL files to the S3 bucket via archive_command - params: `{ }`
+
+POST `/walg/disable` - Disable the sending of WAL files to the S3 bucket - params: `{ }`
+
+POST `/walg/backup` - Trigger a physical backup in the background - params: `{ project_id : <int>, backup_id : <int> }`
+
 ### Restarting
 
 GET `/services/restart` - re-reads all configs and restarts all services
