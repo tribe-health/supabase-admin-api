@@ -57,7 +57,7 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 	case "adminapi":
 		configFilePath = adminapiEnvPath
 	case "walg":
-		configFilepath = walgEnvPath
+		configFilePath = walgEnvPath
 	}
 
 	contents, err := ioutil.ReadFile(configFilePath)
