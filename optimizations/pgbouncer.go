@@ -10,48 +10,48 @@ type PgBouncerSettings struct {
 var (
 	PgBouncerRecommendations = map[InstanceType]PgBouncerSettings{
 		"t4g.micro": {
-			MaxClientConn:   100,
-			DefaultPoolSize: 5,
+			MaxClientConn:   200,
+			DefaultPoolSize: 15,
 		},
 		"t4g.small": {
 			MaxClientConn:   200,
-			DefaultPoolSize: 5,
-		},
-		"t4g.medium": {
-			MaxClientConn:   400,
-			DefaultPoolSize: 5,
-		},
-		"m6g.medium": {
-			MaxClientConn:   400,
-			DefaultPoolSize: 5,
-		},
-		"m6g.large": {
-			MaxClientConn:   800,
-			DefaultPoolSize: 5,
-		},
-		"m6g.xlarge": {
-			MaxClientConn:   1600,
-			DefaultPoolSize: 10,
-		},
-		"m6g.2xlarge": {
-			MaxClientConn:   3200,
 			DefaultPoolSize: 15,
 		},
-		"m6g.4xlarge": {
-			MaxClientConn:   6400,
+		"t4g.medium": {
+			MaxClientConn:   200,
+			DefaultPoolSize: 15,
+		},
+		"m6g.medium": {
+			MaxClientConn:   200,
+			DefaultPoolSize: 15,
+		},
+		"m6g.large": {
+			MaxClientConn:   300,
+			DefaultPoolSize: 15,
+		},
+		"m6g.xlarge": {
+			MaxClientConn:   700,
+			DefaultPoolSize: 20,
+		},
+		"m6g.2xlarge": {
+			MaxClientConn:   1500,
 			DefaultPoolSize: 25,
 		},
+		"m6g.4xlarge": {
+			MaxClientConn:   3000,
+			DefaultPoolSize: 32,
+		},
 		"m6g.8xlarge": {
-			MaxClientConn:   12800,
-			DefaultPoolSize: 45,
+			MaxClientConn:   6000,
+			DefaultPoolSize: 64,
 		},
 		"m6g.12xlarge": {
-			MaxClientConn:   12800,
-			DefaultPoolSize: 60,
+			MaxClientConn:   9000,
+			DefaultPoolSize: 96,
 		},
 		"m6g.16xlarge": {
-			MaxClientConn:   12800,
-			DefaultPoolSize: 70,
+			MaxClientConn:   12000,
+			DefaultPoolSize: 128,
 		},
 	}
 )
