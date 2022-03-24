@@ -27,6 +27,9 @@ const kongYmlPathOld string = "/etc/kong/old.kong.yml"
 const adminapiEnvPath string = "/etc/adminapi/adminapi.yaml"
 const adminapiEnvPathOld string = "/etc/adminapi/old.adminapi.yaml"
 
+const walgEnvPath string = "/etc/wal-g/config.json"
+const walgEnvPathOld string = "/etc/wal-g/old.config.json"
+
 // FileContents holds the content of a config file
 type FileContents struct {
 	RawContents     string `json:"raw_contents"`
@@ -53,6 +56,8 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 		configFilePath = realtimeConfPath
 	case "adminapi":
 		configFilePath = adminapiEnvPath
+	case "walg":
+		configFilepath = walgEnvPath
 	}
 
 	contents, err := ioutil.ReadFile(configFilePath)
@@ -93,6 +98,9 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 	case "adminapi":
 		configFilePath = adminapiEnvPath
 		configFilePathOld = adminapiEnvPathOld
+	case "walg":
+		configFilePath = walgEnvPath
+		configFilePathOld = walgEnvPathOld
 	}
 
 	params := &FileContents{}
@@ -126,7 +134,7 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-	if params.RestartServices {
+	if params.RestartServices && application != "walg" {
 		return a.RestartServices(w, r)
 	}
 
