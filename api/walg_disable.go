@@ -11,7 +11,9 @@ func DisableWALG(w http.ResponseWriter, r *http.Request) error {
 	cmd := exec.Command("/bin/sh", "-c", "sudo /root/disable_walg.sh")
 	output, err := cmd.Output()
 	if err != nil {
-		return errors.Wrap(err, "failed to disable WAL-G")
+		errMessage := "failed to disable WAL-G"
+		logrus.WithError(err).Warn(errMessage)
+		return errors.Wrap(err, errMessage)
 	}
 	logrus.WithField("output", string(output)).Info("WAL-G disabled")
 	return nil
