@@ -16,6 +16,9 @@ var (
 		"t4g.small": {
 			DbPool: 30,
 		},
+		"t4g.medium": {
+			DbPool: 40,
+		},
 		"m6g.medium": {
 			DbPool: 40,
 		},
@@ -27,6 +30,18 @@ var (
 		},
 		"m6g.2xlarge": {
 			DbPool: 70,
+		},
+		"m6g.4xlarge": {
+			DbPool: 70,
+		},
+		"m6g.8xlarge": {
+			DbPool: 100,
+		},
+		"m6g.12xlarge": {
+			DbPool: 100,
+		},
+		"m6g.16xlarge": {
+			DbPool: 100,
 		},
 	}
 )
