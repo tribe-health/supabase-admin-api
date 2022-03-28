@@ -56,6 +56,8 @@ POST `/walg/disable` - Disable the sending of WAL files to the S3 bucket - param
 
 POST `/walg/backup` - Trigger a physical backup in the background - params: `{ project_id : <int>, backup_id : <int> }`
 
+POST `/walg/complete-restoration` - Complete restoration process - params: `{ }`
+
 ### Restarting
 
 GET `/services/restart` - re-reads all configs and restarts all services
