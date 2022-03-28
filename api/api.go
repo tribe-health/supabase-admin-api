@@ -197,7 +197,7 @@ func NewAPIWithVersion(config *Config, version string) *API {
 				r.Method("POST", "/backup", ErrorHandlingWrapper(api.BackupDatabase))
 				r.Method("POST", "/enable", ErrorHandlingWrapper(api.EnableWALG))
 				r.Method("POST", "/disable", ErrorHandlingWrapper(api.DisableWALG))
-				r.Method("POST", "/complete-restoration", ErrorHandlingWrapper(CompleteRestorationWALG))
+				r.Method("POST", "/complete-restoration", ErrorHandlingWrapper(api.CompleteRestorationWALG))
 			})
 		})
 	})
