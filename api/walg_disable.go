@@ -12,7 +12,7 @@ func DisableWALG(w http.ResponseWriter, r *http.Request) error {
 	output, err := cmd.Output()
 	if err != nil {
 		errMessage := "failed to disable WAL-G"
-		logrus.WithError(err).Warn(errMessage)
+		logrus.WithError(output).Warn(errMessage)
 		return errors.Wrap(err, errMessage)
 	}
 	logrus.WithField("output", string(output)).Info("WAL-G disabled")
