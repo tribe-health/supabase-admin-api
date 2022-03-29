@@ -33,6 +33,7 @@ type Config struct {
 	MetricCollectors               []string                      `yaml:"metric_collectors" required:"true"`
 	GotrueHealthEndpoint           string                        `yaml:"gotrue_health_endpoint" required:"false" default:"http://localhost:9999/health"`
 	PostgrestEndpoint              string                        `yaml:"postgrest_endpoint" required:"false" default:"http://localhost:3000/"`
+	PgBouncerEndpoints             []string                      `yaml:"pgbouncer_endpoints" required:"false"`
 	RealtimeServiceName            string                        `yaml:"realtime_service_name" required:"false" default:"supabase"`
 	UpstreamMetricsSources         []metrics.MetricsSourceConfig `yaml:"upstream_metrics_sources" required:"true"`
 	NodeExporterAdditionalArgs     []string                      `yaml:"node_exporter_additional_args" required:"false"`
@@ -122,7 +123,7 @@ func waitForTermination(log logrus.FieldLogger, done <-chan struct{}) {
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
 	api := &API{config: config, version: version}
-	nodeMetrics, err := NewMetrics(config.MetricCollectors, config.GotrueHealthEndpoint, config.PostgrestEndpoint, config.NodeExporterAdditionalArgs)
+	nodeMetrics, err := NewMetrics(config.MetricCollectors, config.GotrueHealthEndpoint, config.PostgrestEndpoint, config.PgBouncerEndpoints, config.NodeExporterAdditionalArgs)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))
 	}

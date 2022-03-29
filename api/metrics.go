@@ -1,8 +1,10 @@
 package api
 
 import (
+	"fmt"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/prometheus-community/pgbouncer_exporter/exporter"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/node_exporter/collector"
@@ -17,7 +19,10 @@ type Metrics struct {
 	registry *prometheus.Registry
 }
 
-func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string, nodeExporterAdditionalArgs []string) (*Metrics, error) {
+func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string, pgbouncerConnStrings []string, nodeExporterAdditionalArgs []string) (*Metrics, error) {
+	if len(pgbouncerConnStrings) > 1 {
+		return nil, fmt.Errorf("only a single pgbouncer endpoint is supported at the moment")
+	}
 	registry := prometheus.NewRegistry()
 
 	// the Parse call is a hack to get the collectors in node-exporter to register
@@ -37,9 +42,17 @@ func NewMetrics(collectors []string, gotrueUrl string, postgrestUrl string, node
 	}
 
 	rtime := metrics.NewRealtimeCollector()
-	gotrue := metrics.NewGotrueCollector(gotrueUrl)
-	postgrest := metrics.NewPostgrestCollector(postgrestUrl)
-	for _, c := range []prometheus.Collector{node, rtime, gotrue, postgrest} {
+	metricsCollectors := []prometheus.Collector{node, rtime}
+	if gotrueUrl != "" {
+		metricsCollectors = append(metricsCollectors, metrics.NewGotrueCollector(gotrueUrl))
+	}
+	if postgrestUrl != "" {
+		metricsCollectors = append(metricsCollectors, metrics.NewPostgrestCollector(postgrestUrl))
+	}
+	if len(pgbouncerConnStrings) == 1 {
+		metricsCollectors = append(metricsCollectors, exporter.NewExporter(pgbouncerConnStrings[0], "pgbouncer", log.WithPrefix(filteredLogger, "service", "pgbouncer")))
+	}
+	for _, c := range metricsCollectors {
 		err = registry.Register(c)
 		if err != nil {
 			return nil, err

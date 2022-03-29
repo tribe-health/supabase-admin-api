@@ -7,9 +7,9 @@ import (
 )
 
 type GotrueCollector struct {
-	up *prometheus.Desc
+	up     *prometheus.Desc
 	client *http.Client
-	url string
+	url    string
 }
 
 func NewGotrueCollector(gotrueUrl string) *GotrueCollector {
