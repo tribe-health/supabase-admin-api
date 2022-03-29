@@ -12,6 +12,12 @@ import (
 const postgrestConfPath string = "/etc/postgrest/base.conf"
 const postgrestConfPathOld string = "/etc/postgrest/old.base.conf"
 
+const postgresqlConfPath string = "/etc/postgresql-custom/custom-overrides.conf"
+const postgresqlConfPathOld string = "/etc/postgresql-custom/old.custom-overrides.conf"
+
+const pgbouncerConfPath string = "/etc/pgbouncer-custom/custom-overrides.conf"
+const pgbouncerConfPathOld string = "/etc/pgbouncer-custom/old.custom-overrides.conf"
+
 const pgListenConfPath string = "/etc/pg_listen.conf"
 const pgListenConfPathOld string = "/etc/old.pg_listen.conf"
 
@@ -101,6 +107,12 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 	case "walg":
 		configFilePath = walgEnvPath
 		configFilePathOld = walgEnvPathOld
+	case "postgresql":
+		configFilePath = postgresqlConfPath
+		configFilePathOld = postgresqlConfPathOld
+	case "pgbouncer":
+		configFilePath = pgbouncerConfPath
+		configFilePathOld = pgbouncerConfPathOld
 	}
 
 	params := &FileContents{}
