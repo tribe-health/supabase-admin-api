@@ -72,3 +72,4 @@ func (a *API) DisableWALG(w http.ResponseWriter, r *http.Request) error {
 	logrus.WithField("output", string(output)).Info("WAL-G disabled")
 	return nil
 }
+
