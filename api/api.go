@@ -155,6 +155,10 @@ func NewAPIWithVersion(config *Config, version string) *API {
 		r.Use(api.RoleValidatingAuthHandler(Service))
 		r.Method("GET", "/privileged/project-metrics", ErrorHandlingWrapper(api.ServeUpstreamMetrics(cache.Get)))
 	})
+	r.Group(func(r chi.Router) {
+		r.Use(api.BasicAuthValidatingHandler(Service))
+		r.Method("GET", "/privileged/metrics", ErrorHandlingWrapper(api.ServeUpstreamMetrics(cache.Get)))
+	})
 
 	// private endpoints
 	r.Group(func(r chi.Router) {
