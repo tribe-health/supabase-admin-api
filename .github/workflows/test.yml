@@ -25,5 +25,4 @@ jobs:
 
       - name: Linting etc
         run: |
-          go get -u golang.org/x/lint/golint
-          make lint vet
+          make vet
