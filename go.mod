@@ -2,7 +2,7 @@ module github.com/supabase/supabase-admin-api
 
 replace github.com/coreos/go-systemd => github.com/coreos/go-systemd/v22 v22.3.2
 
-replace github.com/prometheus-community/pgbouncer_exporter => github.com/supabase/pgbouncer_exporter v0.4.2-0.20220328170229-fe4104735b8b
+replace github.com/prometheus-community/pgbouncer_exporter => github.com/supabase/pgbouncer_exporter v0.4.2-0.20220411200531-e35140940d97
 
 go 1.18
 
