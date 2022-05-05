@@ -49,8 +49,12 @@ func (c *Config) GetMetricsSources() []metrics.MetricsSource {
 	var parser expfmt.TextParser
 	sources := make([]metrics.MetricsSource, 0)
 	for _, config := range c.UpstreamMetricsSources {
+		timeout, err := time.ParseDuration(config.SourceTimeout)
+		if err != nil {
+			logger.Panicf("failed to parse upstream metric source timeout: %+v", err)
+		}
 		client := http.Client{
-			Timeout: 1 * time.Second,
+			Timeout: timeout,
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
 					InsecureSkipVerify: config.SkipTlsVerify,
