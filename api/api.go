@@ -177,10 +177,9 @@ func NewAPIWithVersion(config *Config, version string) *API {
 			r.Route("/service", func(r chi.Router) {
 				// applications are kong, pglisten, postgrest, goauth, realtime, adminapi, all
 				r.Route("/restart", func(r chi.Router) {
-					r.Method("GET", "/", ErrorHandlingWrapper(api.RestartServices))
-					r.Method("GET", "/{application}", ErrorHandlingWrapper(api.RestartServices))
+					r.Method("GET", "/", ErrorHandlingWrapper(api.HandleLifecycleCommand))
+					r.Method("GET", "/{application}", ErrorHandlingWrapper(api.HandleLifecycleCommand))
 				})
-				r.Method("GET", "/reboot", ErrorHandlingWrapper(api.RebootMachine))
 			})
 
 			// applications are kong, pglisten, postgrest, goauth, realtime, adminapi

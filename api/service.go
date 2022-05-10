@@ -18,6 +18,8 @@ const (
 	Stop    LifecycleCommand = "stop"
 	Start                    = "start"
 	Restart                  = "restart"
+	Enable                   = "enable"
+	Disable                  = "disable"
 )
 
 // we default to a restart unless a suitable override is provided
@@ -34,13 +36,17 @@ func getLifecycleCommand(r *http.Request) (LifecycleCommand, error) {
 		return Start, nil
 	case Stop:
 		return Stop, nil
+	case Enable:
+		return Enable, nil
+	case Disable:
+		return Disable, nil
 	default:
 		return Restart, fmt.Errorf("unknown lifecycle command: %+v", vals[0])
 	}
 }
 
-// RestartServices is the endpoint for fetching current goauth email config
-func (a *API) RestartServices(w http.ResponseWriter, r *http.Request) error {
+// HandleLifecycleCommand is the endpoint for executing service lifecycle commands
+func (a *API) HandleLifecycleCommand(w http.ResponseWriter, r *http.Request) error {
 	sudo := "sudo"
 	app := "systemctl"
 	arg0 := "daemon-reload"
@@ -117,12 +123,4 @@ func derivePostgresqlUnitName() string {
 	} else {
 		return "postgresql.service"
 	}
-}
-
-// RebootMachine is the endpoint for fetching current goauth email config
-func (a *API) RebootMachine(w http.ResponseWriter, r *http.Request) error {
-	// app := "reboot"
-	// exec.Command(app)
-
-	return sendJSON(w, http.StatusInternalServerError, "endpoint not yet implemented")
 }

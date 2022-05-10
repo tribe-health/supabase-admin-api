@@ -147,7 +147,7 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if params.RestartServices && application != "walg" {
-		return a.RestartServices(w, r)
+		return a.HandleLifecycleCommand(w, r)
 	}
 
 	return sendJSON(w, http.StatusOK, map[string]int{"bytes_written": bytesWritten})
