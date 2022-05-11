@@ -13,8 +13,8 @@ type MetricsSourceConfig struct {
 	Name           string            `yaml:"name"`
 	Url            string            `yaml:"url"`
 	LabelsToAttach []*prom.LabelPair `yaml:"labels_to_attach"`
-	SkipTlsVerify  bool              `yaml:"skip_tls_verify" default:"false" required:"false"`
-	SourceTimeout  string            `yaml:"source_timeout" default:"5s" required:"false"`
+	SkipTlsVerify  bool              `yaml:"skip_tls_verify" required:"false"`
+	SourceTimeout  string            `yaml:"source_timeout" required:"false"`
 }
 
 type MetricsSource struct {

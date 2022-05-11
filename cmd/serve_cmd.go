@@ -22,7 +22,7 @@ func serve() {
 	if err != nil {
 		logrus.Fatalf("failed to read in config: %q", err)
 	}
-	var config api.Config
+	config := api.Config{UpstreamMetricsRefreshDuration: api.DefaultRefreshDuration, RealtimeServiceName: api.DefaultRealtimeServiceName}
 	err = yaml.Unmarshal(bytes, &config)
 	if err != nil {
 		logrus.Fatalf("could not parse config: %q", err)

@@ -31,25 +31,33 @@ type Config struct {
 	Port                           int                           `yaml:"port" default:"8085"`
 	JwtSecret                      string                        `yaml:"jwt_secret" required:"true"`
 	MetricCollectors               []string                      `yaml:"metric_collectors" required:"true"`
-	GotrueHealthEndpoint           string                        `yaml:"gotrue_health_endpoint" required:"false" default:"http://localhost:9999/health"`
-	PostgrestEndpoint              string                        `yaml:"postgrest_endpoint" required:"false" default:"http://localhost:3000/"`
+	GotrueHealthEndpoint           string                        `yaml:"gotrue_health_endpoint" required:"false"`
+	PostgrestEndpoint              string                        `yaml:"postgrest_endpoint" required:"false"`
 	PgBouncerEndpoints             []string                      `yaml:"pgbouncer_endpoints" required:"false"`
-	RealtimeServiceName            string                        `yaml:"realtime_service_name" required:"false" default:"supabase"`
+	RealtimeServiceName            string                        `yaml:"realtime_service_name" required:"false"`
 	UpstreamMetricsSources         []metrics.MetricsSourceConfig `yaml:"upstream_metrics_sources" required:"true"`
 	NodeExporterAdditionalArgs     []string                      `yaml:"node_exporter_additional_args" required:"false"`
-	UpstreamMetricsRefreshDuration string                        `yaml:"upstream_metrics_refresh_duration" default:"60s"`
+	UpstreamMetricsRefreshDuration string                        `yaml:"upstream_metrics_refresh_duration"`
 
 	// supply to enable TLS termination
 	KeyPath  string `yaml:"key_path" required:"false"`
 	CertPath string `yaml:"cert_path" required:"false"`
 }
 
+const DefaultRefreshDuration = "60s"
+const DefaultTimeout = "10s"
+const DefaultRealtimeServiceName = "realtime"
+
 func (c *Config) GetMetricsSources() []metrics.MetricsSource {
 	logger := logrus.New()
 	var parser expfmt.TextParser
 	sources := make([]metrics.MetricsSource, 0)
 	for _, config := range c.UpstreamMetricsSources {
-		timeout, err := time.ParseDuration(config.SourceTimeout)
+		timeoutS := config.SourceTimeout
+		if timeoutS == "" {
+			timeoutS = DefaultTimeout
+		}
+		timeout, err := time.ParseDuration(timeoutS)
 		if err != nil {
 			logger.Panicf("failed to parse upstream metric source timeout: %+v", err)
 		}

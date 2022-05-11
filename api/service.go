@@ -107,7 +107,7 @@ func (a *API) HandleLifecycleCommand(w http.ResponseWriter, r *http.Request) err
 		stdout, err = cmd.Output()
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, err.Error())
+			fmt.Fprintf(os.Stderr, "failed to %s %s service: %+v\n", lifecycleCommand, arg1, err)
 		}
 
 		fmt.Fprintf(os.Stdout, string(stdout))
