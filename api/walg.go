@@ -10,6 +10,11 @@ import (
 )
 
 // FileContents holds the content of a config file
+type RestoreConfiguration struct {
+	BackupName string `json:"backup_name"`
+	RecoveryTimeTarget string   `json:"recovery_time_target"`
+}
+
 type BackupConfiguration struct {
 	ProjectId int `json:"project_id"`
 	BackupId int   `json:"backup_id"`
@@ -34,6 +39,28 @@ func (a *API) BackupDatabase(w http.ResponseWriter, r *http.Request) error {
 		return errors.Wrap(err, errMessage)
 	}
 	logrus.WithField("output", string(output)).Info("WAL-G backup completed")
+	return nil
+}
+
+func (a *API) RestoreDatabase(w http.ResponseWriter, r *http.Request) error {
+	params := &RestoreConfiguration{}
+
+	jsonDecoder := json.NewDecoder(r.Body)
+	if err := jsonDecoder.Decode(params); err != nil {
+		logrus.WithError(err).Warn("failed to decode parameters")
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
+	}
+
+	completedCommand := fmt.Sprintf("%s %s %s", "sudo /root/commence_walg_restore.sh", params.BackupName, params.RecoveryTimeTarget)
+
+	cmd := exec.Command("/bin/sh", "-c", completedCommand)
+	output, err := cmd.Output()
+	if err != nil {
+		errMessage := "failed to execute WAL-G restore"
+		logrus.WithField("output", string(output)).Warn(errMessage)
+		return errors.Wrap(err, errMessage)
+	}
+	logrus.WithField("output", string(output)).Info("WAL-G restore completed")
 	return nil
 }
 
