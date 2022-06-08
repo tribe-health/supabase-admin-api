@@ -6,18 +6,18 @@ import (
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os/exec"
-	"fmt"
+	"strconv"
 )
 
 // FileContents holds the content of a config file
 type RestoreConfiguration struct {
-	BackupName string `json:"backup_name"`
-	RecoveryTimeTarget string   `json:"recovery_time_target"`
+	BackupName         string `json:"backup_name"`
+	RecoveryTimeTarget string `json:"recovery_time_target"`
 }
 
 type BackupConfiguration struct {
 	ProjectId int `json:"project_id"`
-	BackupId int   `json:"backup_id"`
+	BackupId  int `json:"backup_id"`
 }
 
 func (a *API) BackupDatabase(w http.ResponseWriter, r *http.Request) error {
@@ -29,9 +29,7 @@ func (a *API) BackupDatabase(w http.ResponseWriter, r *http.Request) error {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-    completedCommand := fmt.Sprintf("%s %d %d", "sudo /root/commence_walg_backup.sh", params.ProjectId, params.BackupId)
-
-	cmd := exec.Command("/bin/sh", "-c", completedCommand)
+	cmd := exec.Command("sudo", "/root/commence_walg_backup.sh", strconv.Itoa(params.ProjectId), strconv.Itoa(params.BackupId))
 	output, err := cmd.Output()
 	if err != nil {
 		errMessage := "failed to execute WAL-G backup"
@@ -51,9 +49,7 @@ func (a *API) RestoreDatabase(w http.ResponseWriter, r *http.Request) error {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-	completedCommand := fmt.Sprintf("%s %s %s", "sudo /root/commence_walg_restore.sh", params.BackupName, params.RecoveryTimeTarget)
-
-	cmd := exec.Command("/bin/sh", "-c", completedCommand)
+	cmd := exec.Command("sudo", "/root/commence_walg_restore.sh", params.BackupName, params.RecoveryTimeTarget)
 	output, err := cmd.Output()
 	if err != nil {
 		errMessage := "failed to execute WAL-G restore"
@@ -99,4 +95,3 @@ func (a *API) DisableWALG(w http.ResponseWriter, r *http.Request) error {
 	logrus.WithField("output", string(output)).Info("WAL-G disabled")
 	return nil
 }
-
