@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/prometheus/common/expfmt"
 	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
+	"github.com/supabase/supabase-admin-api/api/network_bans"
 	"net/http"
 	"os"
 	"os/signal"
@@ -38,6 +39,7 @@ type Config struct {
 	UpstreamMetricsSources         []metrics.MetricsSourceConfig `yaml:"upstream_metrics_sources" required:"true"`
 	NodeExporterAdditionalArgs     []string                      `yaml:"node_exporter_additional_args" required:"false"`
 	UpstreamMetricsRefreshDuration string                        `yaml:"upstream_metrics_refresh_duration"`
+	Fail2banSocket                 string                        `yaml:"fail2ban_socket" required:"true"`
 
 	// supply to enable TLS termination
 	KeyPath  string `yaml:"key_path" required:"false"`
@@ -88,6 +90,7 @@ type API struct {
 	config         *Config
 	version        string
 	metricsSources []metrics.MetricsSource
+	networkBans    *network_bans.Fail2Ban
 }
 
 // ListenAndServe starts the REST API
@@ -134,7 +137,8 @@ func waitForTermination(log logrus.FieldLogger, done <-chan struct{}) {
 
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
-	api := &API{config: config, version: version}
+	fail2ban := network_bans.Fail2Ban{Fail2banSocket: config.Fail2banSocket}
+	api := &API{config: config, version: version, networkBans: &fail2ban}
 	nodeMetrics, err := NewMetrics(config.MetricCollectors, config.GotrueHealthEndpoint, config.PostgrestEndpoint, config.PgBouncerEndpoints, config.NodeExporterAdditionalArgs)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))
@@ -203,6 +207,11 @@ func NewAPIWithVersion(config *Config, version string) *API {
 
 			r.Route("/cert", func(r chi.Router) {
 				r.Method("POST", "/", ErrorHandlingWrapper(api.UpdateCert))
+			})
+
+			r.Route("/network-bans", func(r chi.Router) {
+				r.Method("GET", "/", ErrorHandlingWrapper(api.GetCurrentBans))
+				r.Method("DELETE", "/", ErrorHandlingWrapper(api.UnbanIp))
 			})
 
 			r.Route("/disk", func(r chi.Router) {

@@ -4,6 +4,8 @@ replace github.com/coreos/go-systemd => github.com/coreos/go-systemd/v22 v22.3.2
 
 replace github.com/prometheus-community/pgbouncer_exporter => github.com/supabase/pgbouncer_exporter v0.4.2-0.20220411200531-e35140940d97
 
+replace github.com/Sean-Der/fail2go => github.com/darora/fail2go v0.0.0-20220722011341-e51a9b92b69a
+
 go 1.18
 
 require (
@@ -42,6 +44,11 @@ require (
 )
 
 require (
+	github.com/Sean-Der/fail2go v0.0.0-20170425205434-72ede0333ad6
+	golang.org/x/exp v0.0.0-20220713135740-79cabaa25d75
+)
+
+require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.6.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.2 // indirect
@@ -59,14 +66,16 @@ require (
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/godbus/dbus v0.0.0-20190402143921-271e53dc4968 // indirect
 	github.com/godbus/dbus/v5 v5.0.4 // indirect
-	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/hodgesds/perf-utils v0.2.5 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/native v0.0.0-20200817173448-b6b71def0850 // indirect
+	github.com/kisielk/og-rek v1.2.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/lufia/iostat v1.1.0 // indirect
+	github.com/mattn/go-sqlite3 v1.14.14 // indirect
 	github.com/mattn/go-xmlrpc v0.0.3 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mdlayher/genetlink v1.0.0 // indirect
