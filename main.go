@@ -8,7 +8,9 @@ import (
 )
 
 func init() {
-	gotenv.Load()
+	if err := gotenv.Load(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {

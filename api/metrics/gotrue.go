@@ -1,9 +1,10 @@
 package metrics
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type GotrueCollector struct {

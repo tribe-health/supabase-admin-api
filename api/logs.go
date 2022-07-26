@@ -76,7 +76,7 @@ func (a *API) GetLogContents(w http.ResponseWriter, r *http.Request) error {
 	stdout, err := cmd.Output()
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprint(os.Stderr, err.Error())
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 

@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/supabase/supabase-admin-api/api"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 )
 
 var serveCmd = cobra.Command{

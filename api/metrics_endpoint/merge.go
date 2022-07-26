@@ -2,11 +2,12 @@ package metrics_endpoint
 
 import (
 	"bytes"
+	"io"
+	"net/http"
+
 	prom "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 	"github.com/sirupsen/logrus"
-	"io"
-	"net/http"
 )
 
 type MetricsSourceConfig struct {

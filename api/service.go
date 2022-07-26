@@ -16,10 +16,10 @@ const LifecycleCommandHeader = "X-Supabase-Lifecycle"
 
 const (
 	Stop    LifecycleCommand = "stop"
-	Start                    = "start"
-	Restart                  = "restart"
-	Enable                   = "enable"
-	Disable                  = "disable"
+	Start   LifecycleCommand = "start"
+	Restart LifecycleCommand = "restart"
+	Enable  LifecycleCommand = "enable"
+	Disable LifecycleCommand = "disable"
 )
 
 // we default to a restart unless a suitable override is provided
@@ -55,15 +55,15 @@ func (a *API) HandleLifecycleCommand(w http.ResponseWriter, r *http.Request) err
 	stdout, err := cmd.Output()
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprint(os.Stderr, err.Error())
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-	fmt.Fprintf(os.Stdout, string(stdout))
+	fmt.Fprint(os.Stdout, string(stdout))
 
 	lifecycleCommand, err := getLifecycleCommand(r)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprint(os.Stderr, err.Error())
 		return sendJSON(w, http.StatusBadRequest, err.Error())
 	}
 
@@ -110,7 +110,7 @@ func (a *API) HandleLifecycleCommand(w http.ResponseWriter, r *http.Request) err
 			fmt.Fprintf(os.Stderr, "failed to %s %s service: %+v\n", lifecycleCommand, arg1, err)
 		}
 
-		fmt.Fprintf(os.Stdout, string(stdout))
+		fmt.Fprint(os.Stdout, string(stdout))
 	}()
 
 	return sendJSON(w, http.StatusOK, 200)

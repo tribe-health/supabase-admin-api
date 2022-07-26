@@ -2,11 +2,12 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"os/exec"
 	"strconv"
+
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // FileContents holds the content of a config file

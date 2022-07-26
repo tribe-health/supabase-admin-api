@@ -139,7 +139,10 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
-	f.Sync()
+	err = f.Sync()
+	if err != nil {
+		return sendJSON(w, http.StatusInternalServerError, err.Error())
+	}
 
 	err = os.Chmod(configFilePath, 0664)
 	if err != nil {

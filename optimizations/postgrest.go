@@ -50,7 +50,7 @@ func OptimizePostgrest(destinationFile string, instanceType InstanceType) error 
 	settings, ok := PostgrestServerRecommendations[instanceType]
 	if !ok {
 		logrus.WithField("instanceType", instanceType).Warn("Using fallback recommendations.")
-		settings, _ = PostgrestServerRecommendations[FallbackInstanceType]
+		settings = PostgrestServerRecommendations[FallbackInstanceType]
 	}
 	return writeRecommendationsToFile(settings, destinationFile)
 }

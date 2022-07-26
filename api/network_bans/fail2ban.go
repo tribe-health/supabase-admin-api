@@ -1,10 +1,11 @@
 package network_bans
 
 import (
+	"log"
+
 	"github.com/Sean-Der/fail2go"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
-	"log"
 )
 
 type Fail2Ban struct {

@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"context"
+
 	"github.com/coreos/go-systemd/dbus"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
@@ -28,7 +29,8 @@ func (r *RealtimeCollector) Describe(ch chan<- *prometheus.Desc) {
 
 func (r *RealtimeCollector) Collect(ch chan<- prometheus.Metric) {
 	ctx := context.Background()
-	conn, err := dbus.NewSystemConnectionContext(ctx); if err != nil {
+	conn, err := dbus.NewSystemConnectionContext(ctx)
+	if err != nil {
 		logrus.Warnf("Failed to collect realtime info: %+v", err)
 	}
 	defer conn.Close()

@@ -1,8 +1,9 @@
 package api
 
 import (
-	"github.com/sirupsen/logrus"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 const PlaceholderCacheKey = "placeholder"
