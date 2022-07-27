@@ -2,6 +2,9 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/prometheus-community/pgbouncer_exporter/exporter"
@@ -11,8 +14,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/supabase/supabase-admin-api/api/metrics"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"net/http"
-	"os"
 )
 
 type Metrics struct {

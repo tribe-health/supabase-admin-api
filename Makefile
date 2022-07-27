@@ -12,14 +12,13 @@ build: ## Build the binary.
 	GOOS=linux GOARCH=arm64 go build $(FLAGS) -o supabase-admin-api-arm64
 
 deps: ## Install dependencies.
-	@go get -u golang.org/x/lint/golint
 	@go mod download
 
 lint: ## Lint the code.
-	golint $(CHECK_FILES)
+	docker run --rm -v $(pwd):/app -w /app golangci/golangci-lint:v1.47.2 golangci-lint run -v --timeout 300s
 
 test: ## Run tests.
-	go test -p 1 -v $(CHECK_FILES)
+	go test ./... -p 1 -race -v -count=1 -coverpkg ./cmd/...,./api/...,./optimizations/... -coverprofile=coverage.out
 
 vet: # Vet the code
 	go vet $(CHECK_FILES)

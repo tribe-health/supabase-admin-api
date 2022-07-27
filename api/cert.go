@@ -24,9 +24,12 @@ type secretConfig struct {
 }
 
 func getSecret(secretConfig secretConfig) (string, error) {
-	//Create a Secrets Manager client
-	svc := secretsmanager.New(session.New(),
-		aws.NewConfig().WithRegion(secretConfig.SecretRegion))
+	sess, err := session.NewSession(aws.NewConfig().WithRegion(secretConfig.SecretRegion))
+	if err != nil {
+		return "", err
+	}
+	// Create a Secrets Manager client
+	svc := secretsmanager.New(sess)
 	input := &secretsmanager.GetSecretValueInput{
 		SecretId: aws.String(secretConfig.SecretName),
 	}
@@ -37,8 +40,7 @@ func getSecret(secretConfig secretConfig) (string, error) {
 		return "", err
 	}
 
-	var secretString string
-	secretString = *result.SecretString
+	secretString := *result.SecretString
 
 	return secretString, nil
 }
@@ -50,7 +52,7 @@ func getCertAndKey(secretConfig secretConfig) (cert, error) {
 	}
 	var cert cert
 	err = json.Unmarshal([]byte(secret), &cert)
-	return cert, nil
+	return cert, err
 }
 
 func writeToFile(file string, data string) {
@@ -83,7 +85,7 @@ func (a *API) UpdateCert(w http.ResponseWriter, r *http.Request) error {
 		cmd := exec.Command("sudo", "systemctl", "reload", "kong.service")
 		_, err = cmd.Output()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, err.Error())
+			fmt.Fprint(os.Stderr, err.Error())
 		}
 	}()
 

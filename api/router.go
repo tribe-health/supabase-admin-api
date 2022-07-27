@@ -2,8 +2,9 @@ package api
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"net/http"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 type ErrorHandlingWrapper func(w http.ResponseWriter, r *http.Request) error
@@ -37,7 +38,10 @@ func (a *API) BasicAuthValidatingHandler(roleName string) func(next http.Handler
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			_, tokenString, ok := r.BasicAuth()
 			if !ok {
-				sendJSON(w, http.StatusUnauthorized, "basic auth not provided")
+				if err := sendJSON(w, http.StatusUnauthorized, "basic auth not provided"); err != nil {
+					handleError(err, w, r)
+					return
+				}
 			}
 			tokenVerifier(w, r, tokenString, a, roleName, next)
 		}
@@ -48,21 +52,27 @@ func (a *API) BasicAuthValidatingHandler(roleName string) func(next http.Handler
 
 func tokenVerifier(w http.ResponseWriter, r *http.Request, tokenString string, a *API, roleName string, next http.Handler) {
 	if tokenString == "" {
-		sendJSON(w, http.StatusUnauthorized, "")
+		if err := sendJSON(w, http.StatusUnauthorized, ""); err != nil {
+			handleError(err, w, r)
+			return
+		}
 		return
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return []byte(a.config.JwtSecret), nil
 	})
 	if err != nil {
-		sendJSON(w, http.StatusUnauthorized, err)
+		if err := sendJSON(w, http.StatusUnauthorized, err); err != nil {
+			handleError(err, w, r)
+			return
+		}
 		return
 	}
 
@@ -73,11 +83,21 @@ func tokenVerifier(w http.ResponseWriter, r *http.Request, tokenString string, a
 			next.ServeHTTP(w, r)
 			return
 		} else {
-			sendJSON(w, http.StatusForbidden, "this token does not have a valid claim over the correct role")
+			if err := sendJSON(
+				w,
+				http.StatusForbidden,
+				"this token does not have a valid claim over the correct role",
+			); err != nil {
+				handleError(err, w, r)
+				return
+			}
 			return
 		}
 	} else {
-		sendJSON(w, http.StatusForbidden, err)
+		if err := sendJSON(w, http.StatusForbidden, err); err != nil {
+			handleError(err, w, r)
+			return
+		}
 		return
 	}
 }

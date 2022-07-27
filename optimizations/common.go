@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
+	"reflect"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
 	"github.com/pkg/errors"
-	"os"
-	"reflect"
 )
 
 func GetInstanceType(ctx context.Context) (*InstanceType, error) {
@@ -27,6 +28,7 @@ func GetInstanceType(ctx context.Context) (*InstanceType, error) {
 }
 
 type InstanceType = string
+
 const FallbackInstanceType = "m6g.medium"
 
 func generateSettings(settings interface{}) (*string, error) {
@@ -41,13 +43,10 @@ func generateSettings(settings interface{}) (*string, error) {
 		switch f.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			buffer.WriteString(fmt.Sprintf("%s = %d\n", serverFieldName, f.Int()))
-			break
 		case reflect.Float64, reflect.Float32:
 			buffer.WriteString(fmt.Sprintf("%s = %0.03f\n", serverFieldName, f.Float()))
-			break
 		case reflect.String:
 			buffer.WriteString(fmt.Sprintf("%s = '%s'\n", serverFieldName, f.String()))
-			break
 		default:
 			return nil, fmt.Errorf("unsupported type encountered for field %+v: %+v", f, f.Kind())
 		}
@@ -66,4 +65,3 @@ func writeRecommendationsToFile(settings interface{}, destinationFilePath string
 	}
 	return nil
 }
-

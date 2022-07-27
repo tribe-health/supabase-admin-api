@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"context"
-	"github.com/spf13/cobra"
-	"github.com/supabase/supabase-admin-api/optimizations"
 	"log"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/supabase/supabase-admin-api/optimizations"
 )
 
 var optimizePgBouncerCmd = &cobra.Command{

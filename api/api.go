@@ -4,16 +4,17 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/bluele/gcache"
-	"github.com/go-chi/chi/middleware"
-	"github.com/prometheus/common/expfmt"
-	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
-	"github.com/supabase/supabase-admin-api/api/network_bans"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/bluele/gcache"
+	"github.com/go-chi/chi/middleware"
+	"github.com/prometheus/common/expfmt"
+	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
+	"github.com/supabase/supabase-admin-api/api/network_bans"
 
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
@@ -22,8 +23,7 @@ import (
 )
 
 const (
-	audHeaderName  = "X-JWT-AUD"
-	defaultVersion = "unknown version"
+	audHeaderName = "X-JWT-AUD"
 )
 
 // Config is the main API config
@@ -86,11 +86,10 @@ func (c *Config) GetMetricsSources() []metrics.MetricsSource {
 
 // API is the main REST API
 type API struct {
-	handler        http.Handler
-	config         *Config
-	version        string
-	metricsSources []metrics.MetricsSource
-	networkBans    *network_bans.Fail2Ban
+	handler     http.Handler
+	config      *Config
+	version     string
+	networkBans *network_bans.Fail2Ban
 }
 
 // ListenAndServe starts the REST API
@@ -107,7 +106,9 @@ func (a *API) ListenAndServe(hostAndPort string, keyPath string, certPath string
 		waitForTermination(log, done)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
-		server.Shutdown(ctx)
+		if err := server.Shutdown(ctx); err != nil {
+			log.WithError(err).Error("Error shutting down server")
+		}
 	}()
 
 	var err error

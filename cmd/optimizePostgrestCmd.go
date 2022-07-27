@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"context"
-	"github.com/spf13/cobra"
-	"github.com/supabase/supabase-admin-api/optimizations"
 	"log"
 	"strings"
+
+	"github.com/spf13/cobra"
+	"github.com/supabase/supabase-admin-api/optimizations"
 )
 
 var optimizePostgrestCmd = &cobra.Command{
 	Use:   "postgrest",
 	Short: "Generate postgrest optimizations",
-	Long: `Optimize postgrest based on the instance type we're running on.`,
+	Long:  `Optimize postgrest based on the instance type we're running on.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		destination := strings.TrimSpace(configFilePath)
 		if destination == "" {
@@ -32,4 +33,3 @@ func init() {
 	optimizeCmd.AddCommand(optimizePostgrestCmd)
 	optimizePostgrestCmd.Flags().StringVarP(&configFilePath, "destination-config-file-path", "d", "", "The file we should write the generated configuration to.")
 }
-

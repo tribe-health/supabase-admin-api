@@ -60,7 +60,7 @@ func OptimizePgBouncer(destinationFile string, instanceType InstanceType) error 
 	settings, ok := PgBouncerRecommendations[instanceType]
 	if !ok {
 		logrus.WithField("instanceType", instanceType).Warn("Using fallback recommendations.")
-		settings, _ = PgBouncerRecommendations[FallbackInstanceType]
+		settings = PgBouncerRecommendations[FallbackInstanceType]
 	}
 	return writeRecommendationsToFile(settings, destinationFile)
 }

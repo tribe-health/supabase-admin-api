@@ -4,6 +4,8 @@ vendor/
 supabase-admin-api
 supabase-admin-api-arm64
 
+coverage.out
+
 .DS_Store
 .vscode
 .data

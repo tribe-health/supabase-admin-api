@@ -2,11 +2,6 @@ package api
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	io_prometheus_client "github.com/prometheus/client_model/go"
-	"github.com/prometheus/common/expfmt"
-	"github.com/sirupsen/logrus"
-	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -14,6 +9,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	io_prometheus_client "github.com/prometheus/client_model/go"
+	"github.com/prometheus/common/expfmt"
+	"github.com/sirupsen/logrus"
+	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
 )
 
 func upstreamServers() (*httptest.Server, *httptest.Server) {

@@ -7,8 +7,8 @@ func TestOptimizePostgrest(t *testing.T) {
 		DbPool: 50,
 	}
 	result, _ := generateSettings(settings)
-	if `db-pool = 50
-` != *result {
+	if *result != `db-pool = 50
+` {
 		t.Fatal(*result)
 	}
 }

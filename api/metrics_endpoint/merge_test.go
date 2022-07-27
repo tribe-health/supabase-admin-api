@@ -2,14 +2,15 @@ package metrics_endpoint
 
 import (
 	"bytes"
-	"github.com/aws/aws-sdk-go/aws"
-	io_prometheus_client "github.com/prometheus/client_model/go"
-	"github.com/prometheus/common/expfmt"
-	"github.com/sirupsen/logrus"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/aws/aws-sdk-go/aws"
+	io_prometheus_client "github.com/prometheus/client_model/go"
+	"github.com/prometheus/common/expfmt"
+	"github.com/sirupsen/logrus"
 )
 
 func TestMetricsSource_ParseAndLabelMetrics(t *testing.T) {

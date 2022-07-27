@@ -228,7 +228,7 @@ func OptimizePostgres(destinationFile string, instanceType InstanceType) error {
 	settings, ok := ServerRecommendations[instanceType]
 	if !ok {
 		logrus.WithField("instanceType", instanceType).Warn("Using fallback recommendations.")
-		settings, _ = ServerRecommendations[FallbackInstanceType]
+		settings = ServerRecommendations[FallbackInstanceType]
 	}
 	return writeRecommendationsToFile(settings, destinationFile)
 }
