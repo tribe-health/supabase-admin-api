@@ -226,6 +226,13 @@ func NewAPIWithVersion(config *Config, version string) *API {
 				r.Method("POST", "/disable", ErrorHandlingWrapper(api.DisableWALG))
 				r.Method("POST", "/complete-restoration", ErrorHandlingWrapper(api.CompleteRestorationWALG))
 			})
+
+			r.Route("/upgrade", func(r chi.Router) {
+				r.Method("POST", "/prepare", ErrorHandlingWrapper(api.PrepareDatabaseUpgrade))
+				r.Method("POST", "/initiate", ErrorHandlingWrapper(api.InitiateDatabaseUpgrade))
+				r.Method("POST", "/complete", ErrorHandlingWrapper(api.CompleteDatabaseUpgrade))
+			})
+
 		})
 	})
 
