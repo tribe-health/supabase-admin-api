@@ -1,5 +1,7 @@
 # Supabase Admin API Server
 
+[![Coverage Status](https://coveralls.io/repos/github/supabase/supabase-admin-api/badge.svg?branch=master)](https://coveralls.io/github/supabase/supabase-admin-api?branch=master)
+
 To run on KPS and administer configs for services:
 
 - Kong
