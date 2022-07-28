@@ -91,7 +91,7 @@ func (a *API) HandleLifecycleCommand(w http.ResponseWriter, r *http.Request) err
 		case "adminapi":
 			arg1 = "adminapi.service"
 		case "postgresql":
-			arg1 = derivePostgresqlUnitName()
+			arg1 = a.derivePostgresqlUnitName()
 		case "pgbouncer":
 			arg1 = "pgbouncer.service"
 		default:
@@ -116,8 +116,8 @@ func (a *API) HandleLifecycleCommand(w http.ResponseWriter, r *http.Request) err
 	return sendJSON(w, http.StatusOK, 200)
 }
 
-func derivePostgresqlUnitName() string {
-	_, err := os.Stat("/etc/postgresql/postgresql.conf")
+func (a *API) derivePostgresqlUnitName() string {
+	_, err := a.fs.Stat("/etc/postgresql/postgresql.conf")
 	if err != nil {
 		return "postgresql@12-main.service"
 	} else {

@@ -13,6 +13,7 @@ import (
 	"github.com/bluele/gcache"
 	"github.com/go-chi/chi/middleware"
 	"github.com/prometheus/common/expfmt"
+	"github.com/spf13/afero"
 	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
 	"github.com/supabase/supabase-admin-api/api/network_bans"
 
@@ -86,6 +87,8 @@ func (c *Config) GetMetricsSources() []metrics.MetricsSource {
 
 // API is the main REST API
 type API struct {
+	fs          afero.Fs
+	ioutil      afero.Afero
 	handler     http.Handler
 	config      *Config
 	version     string
@@ -137,9 +140,16 @@ func waitForTermination(log logrus.FieldLogger, done <-chan struct{}) {
 }
 
 // NewAPIWithVersion creates a new REST API using the specified version
-func NewAPIWithVersion(config *Config, version string) *API {
+func NewAPIWithVersion(config *Config, version string, fs ...afero.Fs) *API {
 	fail2ban := network_bans.Fail2Ban{Fail2banSocket: config.Fail2banSocket}
 	api := &API{config: config, version: version, networkBans: &fail2ban}
+	if fs == nil {
+		api.fs = afero.NewOsFs()
+	} else {
+		api.fs = fs[0]
+	}
+	api.ioutil = afero.Afero{Fs: api.fs}
+
 	nodeMetrics, err := NewMetrics(config.MetricCollectors, config.GotrueHealthEndpoint, config.PostgrestEndpoint, config.PgBouncerEndpoints, config.NodeExporterAdditionalArgs)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))

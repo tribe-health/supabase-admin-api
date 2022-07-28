@@ -2,9 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi"
 )
@@ -66,7 +64,7 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 		configFilePath = walgEnvPath
 	}
 
-	contents, err := ioutil.ReadFile(configFilePath)
+	contents, err := a.ioutil.ReadFile(configFilePath)
 	if err != nil {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
@@ -122,12 +120,12 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-	err := os.Rename(configFilePath, configFilePathOld)
+	err := a.fs.Rename(configFilePath, configFilePathOld)
 	if err != nil {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-	f, err := os.Create(configFilePath)
+	f, err := a.fs.Create(configFilePath)
 	if err != nil {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
@@ -144,7 +142,7 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
 
-	err = os.Chmod(configFilePath, 0664)
+	err = a.fs.Chmod(configFilePath, 0664)
 	if err != nil {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}
