@@ -36,6 +36,9 @@ const adminapiEnvPathOld string = "/etc/adminapi/old.adminapi.yaml"
 const walgEnvPath string = "/etc/wal-g/config.json"
 const walgEnvPathOld string = "/etc/wal-g/old.config.json"
 
+const pgsodiumRootKeyPath string = "/var/lib/postgresql/pgsodium_root.key"
+const pgsodiumRootKeyPathOld string = "/var/lib/postgresql/old.pgsodium_root.key"
+
 // FileContents holds the content of a config file
 type FileContents struct {
 	RawContents     string `json:"raw_contents"`
@@ -64,6 +67,8 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 		configFilePath = adminapiEnvPath
 	case "walg":
 		configFilePath = walgEnvPath
+	case "pgsodium":
+		configFilePath = pgsodiumRootKeyPath
 	}
 
 	contents, err := ioutil.ReadFile(configFilePath)
@@ -113,6 +118,9 @@ func (a *API) SetFileContents(w http.ResponseWriter, r *http.Request) error {
 	case "pgbouncer":
 		configFilePath = pgbouncerConfPath
 		configFilePathOld = pgbouncerConfPathOld
+	case "pgsodium":
+		configFilePath = pgsodiumRootKeyPath
+		configFilePathOld = pgsodiumRootKeyPathOld
 	}
 
 	params := &FileContents{}

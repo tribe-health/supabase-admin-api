@@ -90,6 +90,8 @@ func (a *API) HandleLifecycleCommand(w http.ResponseWriter, r *http.Request) err
 			arg1 = fmt.Sprintf("%s.service", a.config.RealtimeServiceName)
 		case "adminapi":
 			arg1 = "adminapi.service"
+		case "pgsodium":
+			arg1 = derivePostgresqlUnitName()
 		case "postgresql":
 			arg1 = derivePostgresqlUnitName()
 		case "pgbouncer":
