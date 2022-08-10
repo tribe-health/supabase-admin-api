@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -71,7 +70,7 @@ func (a *API) GetFileContents(w http.ResponseWriter, r *http.Request) error {
 		configFilePath = pgsodiumRootKeyPath
 	}
 
-	contents, err := ioutil.ReadFile(configFilePath)
+	contents, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return sendJSON(w, http.StatusInternalServerError, err.Error())
 	}

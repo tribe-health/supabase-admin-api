@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -19,7 +19,7 @@ var serveCmd = cobra.Command{
 }
 
 func serve() {
-	bytes, err := ioutil.ReadFile(serverConfigFilePath)
+	bytes, err := os.ReadFile(serverConfigFilePath)
 	if err != nil {
 		logrus.Fatalf("failed to read in config: %q", err)
 	}
