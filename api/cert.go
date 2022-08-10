@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -56,7 +55,7 @@ func getCertAndKey(secretConfig secretConfig) (cert, error) {
 }
 
 func writeToFile(file string, data string) {
-	err := ioutil.WriteFile(file, []byte(data), 0644)
+	err := os.WriteFile(file, []byte(data), 0644)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
