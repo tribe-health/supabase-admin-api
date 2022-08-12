@@ -35,8 +35,8 @@ const adminapiEnvPathOld string = "/etc/adminapi/old.adminapi.yaml"
 const walgEnvPath string = "/etc/wal-g/config.json"
 const walgEnvPathOld string = "/etc/wal-g/old.config.json"
 
-const pgsodiumRootKeyPath string = "/var/lib/postgresql/pgsodium_root.key"
-const pgsodiumRootKeyPathOld string = "/var/lib/postgresql/old.pgsodium_root.key"
+const pgsodiumRootKeyPath string = "/etc/postgresql-custom/pgsodium_root.key"
+const pgsodiumRootKeyPathOld string = "/etc/postgresql-custom/old.pgsodium_root.key"
 
 // FileContents holds the content of a config file
 type FileContents struct {
