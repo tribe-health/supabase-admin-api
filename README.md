@@ -8,14 +8,6 @@ To run on KPS and administer configs for services:
 - Postgrest
 - Pg-listen
 
-## ENV
-
-requires a `.env` in the project root with:
-
-```bash
-JWT_SECRET=<project-jwt-secret>
-```
-
 ## API Interface
 
 ### Auth
