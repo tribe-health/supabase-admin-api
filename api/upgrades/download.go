@@ -15,6 +15,12 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+type PersistenceMode = string
+
+const (
+	Transient PersistenceMode = "transient"
+)
+
 type UpgradeSourceConfig struct {
 	Region         string `yaml:"region"`
 	S3BucketName   string `yaml:"s3_bucket_name"`
@@ -42,7 +48,7 @@ type Upgrades struct {
 }
 
 func (u *Upgrades) absoluteDestinationFromSource(requestedDestinationPath string, suppressCleanup bool) string {
-	persistenceMode := "transient"
+	persistenceMode := Transient
 	if suppressCleanup == true {
 		persistenceMode = "persistent"
 	}
@@ -96,7 +102,9 @@ func (u *Upgrades) DownloadFile(r *DownloadRequest) (*DownloadResponse, error) {
 		return nil, errors.Wrap(err, "could not determine free disk space")
 	}
 
-	if uint64(attrs.ObjectSize) > freeSpace {
+	// check for at least double the space, since we'd want to keep the old binary around for a while, possibly
+	// extract stuff, etc
+	if uint64(attrs.ObjectSize)*2 > freeSpace {
 		return nil, fmt.Errorf("request object %s/%s has size %d , while we only have free disk space %d bytes", *bucketName, *sourcePath, uint64(attrs.ObjectSize), freeSpace)
 	}
 
