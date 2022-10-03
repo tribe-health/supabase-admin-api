@@ -15,6 +15,7 @@ import (
 	"github.com/prometheus/common/expfmt"
 	metrics "github.com/supabase/supabase-admin-api/api/metrics_endpoint"
 	"github.com/supabase/supabase-admin-api/api/network_bans"
+	"github.com/supabase/supabase-admin-api/monitors"
 
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
@@ -44,6 +45,8 @@ type Config struct {
 	// supply to enable TLS termination
 	KeyPath  string `yaml:"key_path" required:"false"`
 	CertPath string `yaml:"cert_path" required:"false"`
+
+	Monitoring monitors.MonitoringConfig `yaml:"monitoring"`
 }
 
 const DefaultRefreshDuration = "60s"
@@ -90,6 +93,7 @@ type API struct {
 	config      *Config
 	version     string
 	networkBans *network_bans.Fail2Ban
+	monitoring  *monitors.MonitorSet
 }
 
 // ListenAndServe starts the REST API
@@ -102,10 +106,14 @@ func (a *API) ListenAndServe(hostAndPort string, keyPath string, certPath string
 
 	done := make(chan struct{})
 	defer close(done)
+
+	a.monitoring.StartMonitoring()
+
 	go func() {
 		waitForTermination(log, done)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		defer cancel()
+		a.monitoring.StopMonitoring()
 		if err := server.Shutdown(ctx); err != nil {
 			log.WithError(err).Error("Error shutting down server")
 		}
@@ -139,7 +147,13 @@ func waitForTermination(log logrus.FieldLogger, done <-chan struct{}) {
 // NewAPIWithVersion creates a new REST API using the specified version
 func NewAPIWithVersion(config *Config, version string) *API {
 	fail2ban := network_bans.Fail2Ban{Fail2banSocket: config.Fail2banSocket}
-	api := &API{config: config, version: version, networkBans: &fail2ban}
+
+	monitorSet, err := monitors.NewMonitorSet(config.Monitoring)
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to configure monitoring")
+	}
+
+	api := &API{config: config, version: version, networkBans: &fail2ban, monitoring: monitorSet}
 	nodeMetrics, err := NewMetrics(config.MetricCollectors, config.GotrueHealthEndpoint, config.PostgrestEndpoint, config.PgBouncerEndpoints, config.NodeExporterAdditionalArgs)
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't initialize metrics: %+v", err))
